@@ -28,6 +28,8 @@ $(document).ready(function(){
 			myDrawing.nextObject = "circle";
 		}
 		else if(document.getElementById('idRadioPen').checked) {
+			console.log(myDrawing.tempShapes.length)
+			console.log(myDrawing.allShapes.length)
 			myDrawing.tempShapes.push(new Pen(0,0,0,0));
 			myDrawing.nextObject = "pen";
 			console.log(myDrawing.tempShapes[0]);
@@ -86,11 +88,25 @@ $(document).ready(function(){
 			}
 
 			else if(myDrawing.nextObject === "pen"){
-				console.log("pen");
-				console.log(myDrawing.tempShapes[0]);
+				//console.log("pen");
+				//console.log(myDrawing.tempShapes[0]);
+				var len = myDrawing.tempShapes[0].xArray.length -1
 				myDrawing.tempShapes[0].xArray.push(x);
 				myDrawing.tempShapes[0].yArray.push(y);
-				//context.beginPath();
+
+				for(var j = 1; j < len; j++){
+					context.beginPath();
+					context.moveTo(myDrawing.tempShapes[0].xArray[j-1], myDrawing.tempShapes[0].yArray[j-1]);
+					context.lineTo(myDrawing.tempShapes[0].xArray[j], myDrawing.tempShapes[0].yArray[j]);
+					context.closePath();
+					context.stroke();
+				}
+
+				context.beginPath();
+				context.moveTo(myDrawing.tempShapes[0].xArray[len], myDrawing.tempShapes[0].yArray[len]);
+				context.lineTo(x, y);
+				context.closePath();
+				context.stroke();
 
 			}
 		}
@@ -100,7 +116,10 @@ $(document).ready(function(){
 		console.log("mouseUPPPP")
     	myDrawing.isDrawing = false;
         myDrawing.allShapes.push(myDrawing.tempShapes[myDrawing.tempShapes.length-1]);
-        tempShapes = [];
+        //console.log(myDrawing.tempShapes);
+        myDrawing.tempShapes = [];
+        //console.log(myDrawing.tempShapes);
+        //console.log(myDrawing.allShapes[0].xArray);
 	});
 
 	var Shape = Base.extend({
@@ -159,14 +178,21 @@ $(document).ready(function(){
 	});
 
 	var Pen = Shape.extend({
-		xArray : [],
-		yArray : [],
+		constructor: function(startX, startY, x, y){
+			this.base(startX, startY, x, y);
+			this.xArray = [];
+			this.yArray = [];
+		},
 		draw: function(context, i){
-			//for(var j = 1; j < this.xArray.length; i++){
-				//console.log(j);
-			//}
+			for(var j = 0; j < this.xArray.length; j++){
+				context.beginPath();
+				context.moveTo(myDrawing.allShapes[i].xArray[j-1], myDrawing.allShapes[i].yArray[j-1]);
+				context.lineTo(myDrawing.allShapes[i].xArray[j], myDrawing.allShapes[i].yArray[j]);
+				context.closePath();
+				context.stroke();
+			}
 			//context.beginPath();
-
+			//console.log(myDrawing.allShapes[i].xArray.length);
 			//context.moveTo(xArray[])
 
 		}
