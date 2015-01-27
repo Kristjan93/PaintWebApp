@@ -41,7 +41,7 @@ $(document).ready(function(){
 			context.clearRect(0, 0, canvas.width, canvas.height);
 
 			//keeps previous shapes on the canvas
-			//myDrawing.drawAllShapes(context);
+			myDrawing.drawAllShapes(context);
 
 			x = e.pageX - this.offsetLeft;
 			y = e.pageY - this.offsetTop;
