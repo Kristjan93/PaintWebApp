@@ -28,7 +28,9 @@ $(document).ready(function(){
 			myDrawing.nextObject = "circle";
 		}
 		else if(document.getElementById('idRadioPen').checked) {
+			myDrawing.tempShapes.push(new Pen(0,0,0,0));
 			myDrawing.nextObject = "pen";
+			console.log(myDrawing.tempShapes[0]);
 		}
 		myDrawing.currentStartX = e.pageX - this.offsetLeft;
 		myDrawing.currentStartY = e.pageY - this.offsetTop;
@@ -85,16 +87,17 @@ $(document).ready(function(){
 
 			else if(myDrawing.nextObject === "pen"){
 				console.log("pen");
-				context.beginPath();
-				context.moveTo(x, y);
-				context.arc(x, y, 3, 0, Math.PI * 2, false);
-            	context.fill();
+				console.log(myDrawing.tempShapes[0]);
+				myDrawing.tempShapes[0].xArray.push(x);
+				myDrawing.tempShapes[0].yArray.push(y);
+				//context.beginPath();
 
 			}
 		}
 	});
 
 	$("#myCanvas").mouseup(function(e){
+		console.log("mouseUPPPP")
     	myDrawing.isDrawing = false;
         myDrawing.allShapes.push(myDrawing.tempShapes[myDrawing.tempShapes.length-1]);
         tempShapes = [];
@@ -132,6 +135,7 @@ $(document).ready(function(){
 
 	var Circle = Shape.extend({
 		draw: function(context, i){
+			// taka út allt myDrawing og setja this í staðinn
 			var radiusX = (myDrawing.allShapes[i].x - myDrawing.allShapes[i].startX) * 0.5,
 	        radiusY = (myDrawing.allShapes[i].y - myDrawing.allShapes[i].startY) * 0.5,
 	        centerX = myDrawing.allShapes[i].startX + radiusX,
@@ -153,4 +157,18 @@ $(document).ready(function(){
 		    context.stroke();
 		}
 	});
+
+	var Pen = Shape.extend({
+		xArray : [],
+		yArray : [],
+		draw: function(context, i){
+			//for(var j = 1; j < this.xArray.length; i++){
+				//console.log(j);
+			//}
+			//context.beginPath();
+
+			//context.moveTo(xArray[])
+
+		}
+	})
 });
