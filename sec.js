@@ -6,7 +6,7 @@ $(document).ready(function(){
 		currentStartX: undefined,
 		currentStartY: undefined,
 		allShapes: [],
-		tempShapes: [],
+		tempShapes: undefined,
 		nextObject: "line",
 		nextColor: "black",
 		isDrawing: false,
@@ -18,6 +18,8 @@ $(document).ready(function(){
 	};
 
 	$("#myCanvas").mousedown(function(e){
+		myDrawing.currentStartX = e.pageX - this.offsetLeft;
+		myDrawing.currentStartY = e.pageY - this.offsetTop;
 		if(document.getElementById('idRadioRect').checked) {
   			myDrawing.nextObject = "rect";
 		}
@@ -28,14 +30,16 @@ $(document).ready(function(){
 			myDrawing.nextObject = "circle";
 		}
 		else if(document.getElementById('idRadioPen').checked) {
-			console.log(myDrawing.tempShapes.length)
-			console.log(myDrawing.allShapes.length)
-			myDrawing.tempShapes.push(new Pen(0,0,0,0));
+			myDrawing.tempShapes = (new Pen(0,0,0,0));
 			myDrawing.nextObject = "pen";
-			console.log(myDrawing.tempShapes[0]);
 		}
-		myDrawing.currentStartX = e.pageX - this.offsetLeft;
-		myDrawing.currentStartY = e.pageY - this.offsetTop;
+		else if(document.getElementById('idRadioText').checked) {
+			myDrawing.nextObject = "text";
+			myDrawing.tempShapes = (new Tex(e.pageX, e.pageY));
+			$("#idTextBox").css({"top": e.pageY, "left": e.pageX});
+			$("#idTextBox").show();
+		}
+		
 		myDrawing.isDrawing = true;
 	});
 
@@ -51,8 +55,8 @@ $(document).ready(function(){
 			y = e.pageY - this.offsetTop;
 
 			if(myDrawing.nextObject === "line"){
-				myDrawing.tempShapes.push(new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y));
-				console.log("mousedown: ", myDrawing.startX, myDrawing.startY);
+				myDrawing.tempShapes = (new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y));
+				//console.log("mousedown: ", myDrawing.startX, myDrawing.startY);
             	context.beginPath();
 	            context.moveTo(myDrawing.currentStartX, myDrawing.currentStartY);
 	            context.lineTo(x, y);
@@ -60,14 +64,14 @@ $(document).ready(function(){
 			}
 
 			else if(myDrawing.nextObject === "rect"){
-				myDrawing.tempShapes.push(new Rect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY));
+				myDrawing.tempShapes = (new Rect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY));
 				context.beginPath();
 				context.strokeRect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY); // (x,y) (width, height)
 				context.stroke();
 			}
 
 			else if(myDrawing.nextObject === "circle"){
-				myDrawing.tempShapes.push(new Circle(myDrawing.currentStartX, myDrawing.currentStartY, x, y));
+				myDrawing.tempShapes = (new Circle(myDrawing.currentStartX, myDrawing.currentStartY, x, y));
 			    var radiusX = (x - myDrawing.currentStartX) * 0.5,
 			        radiusY = (y - myDrawing.currentStartY) * 0.5,
 			        centerX = myDrawing.currentStartX + radiusX,
@@ -90,34 +94,34 @@ $(document).ready(function(){
 			else if(myDrawing.nextObject === "pen"){
 				//console.log("pen");
 				//console.log(myDrawing.tempShapes[0]);
-				var len = myDrawing.tempShapes[0].xArray.length -1
-				myDrawing.tempShapes[0].xArray.push(x);
-				myDrawing.tempShapes[0].yArray.push(y);
+				var len = myDrawing.tempShapes.xArray.length -1
+				myDrawing.tempShapes.xArray.push(x);
+				myDrawing.tempShapes.yArray.push(y);
 
 				for(var j = 1; j < len; j++){
 					context.beginPath();
-					context.moveTo(myDrawing.tempShapes[0].xArray[j-1], myDrawing.tempShapes[0].yArray[j-1]);
-					context.lineTo(myDrawing.tempShapes[0].xArray[j], myDrawing.tempShapes[0].yArray[j]);
+					context.moveTo(myDrawing.tempShapes.xArray[j-1], myDrawing.tempShapes.yArray[j-1]);
+					context.lineTo(myDrawing.tempShapes.xArray[j], myDrawing.tempShapes.yArray[j]);
 					context.closePath();
 					context.stroke();
 				}
+			}
 
-				context.beginPath();
-				context.moveTo(myDrawing.tempShapes[0].xArray[len], myDrawing.tempShapes[0].yArray[len]);
-				context.lineTo(x, y);
-				context.closePath();
-				context.stroke();
+			else if(myDrawing.nextObject === "text"){
+				//$("#idTextBox").show();
+				$("#idTextBox").css({"top": e.pageY, "left": e.pageX});
 
 			}
+
 		}
 	});
 
 	$("#myCanvas").mouseup(function(e){
 		console.log("mouseUPPPP")
     	myDrawing.isDrawing = false;
-        myDrawing.allShapes.push(myDrawing.tempShapes[myDrawing.tempShapes.length-1]);
+        myDrawing.allShapes.push(myDrawing.tempShapes);
         //console.log(myDrawing.tempShapes);
-        myDrawing.tempShapes = [];
+        myDrawing.tempShapes = undefined;
         //console.log(myDrawing.tempShapes);
         //console.log(myDrawing.allShapes[0].xArray);
 	});
@@ -197,4 +201,35 @@ $(document).ready(function(){
 
 		}
 	})
+
+	var Tex = Shape.extend({
+		constructor: function(startX, startY, x, y){
+			this.myText = undefined;
+		},
+		draw: function(context, i){
+
+		}
+	})
+
+
+	$("#idTextBox").keypress(function(e) {
+	    if(e.which == 13) {
+	        var canvasText = $(this).val();
+	        //myDrawing.tempShapes.myText = canvasText;
+	        console.log(canvasText);
+	        context.fillText(canvasText, myDrawing.currentStartX, myDrawing.currentStartY);
+	        //context.stroke();
+	        $("#idTextBox").val('');
+	        $("#idTextBox").hide();
+	        myDrawing.isDrawing = false;
+	    }
+	});
+
 });
+
+
+
+
+
+
+
