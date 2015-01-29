@@ -2,31 +2,25 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title></title>
-    <!--<link rel="stylesheet" href="style.css">-->
+    <title>Canvas</title>
+    <!-- jquery -->
 	<script src ="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.js"></script>
-
+	<!-- bootstrap -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-
-	<!-- Optional theme -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
-
-	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-
+	<!-- colorpicker -->
 	<script src="bootstrapColorpicker/dist/js/bootstrap-colorpicker.js"></script>
-
-
+	<!-- inheretance library -->
 	<script src="base.js"></script>
+	<!-- main javascript -->
 	<script src="sec.js"></script>
-	<!-- Latest compiled and minified CSS -->
-
-
+	<!-- css styles -->
 	<link rel="stylesheet" type="text/css" href="sec.css"/>
 	<link href="bootstrapColorpicker/dist/css/bootstrap-colorpicker.min.css" rel="stylesheet">
-
 </head>
 <body>
+
 	<div class="row">
   		<div class="col-md-4">
 			<div class="input-group demo2">
@@ -42,23 +36,31 @@
 		<option value=6>large</option>
 		<option value=10>xlarge</option>
 	</select>
-	<input type="text" id="idTextBox" name="rect" hidden><br>
-	<div class="rowa">
+
+	<div class="row">
 		<div class="col-md-4" data-toggle="buttons">
 			<label class="btn btn-primary active">
-			<input type="radio" class="btn btn-primary "id="idRadioLine" name="rect" value="line" checked>Line<br>
-			<label class="btn btn-primary active">
-			<input type="radio" id="idRadioRect" name="rect" value="rect">Rect<br>
-			<label class="btn btn-primary active">
-			<input type="radio" id="idRadioCircle" name="rect" value="rect">Circle<br>
-			<label class="btn btn-primary active">
-			<input type="radio" id="idRadioPen" name="rect" value="rect">Pen<br>
-			<label class="btn btn-primary active">
-			<input type="radio" id="idRadioText" name="rect" value="rect">Text<br>
+				<input type="radio" class="btn btn-primary "id="idRadioLine" name="rect" value="line" checked>Line<br>
+			</label>
+			<label class="btn btn-success active">
+				<input type="radio" id="idRadioRect" name="rect" value="rect">Rect<br>
+			</label>
+			<label class="btn btn-info active">
+				<input type="radio" id="idRadioCircle" name="rect" value="rect">Circle<br>
+			</label>
+			<label class="btn btn-warning active">
+				<input type="radio" id="idRadioPen" name="rect" value="rect">Pen<br>
+			</label>
+			<label class="btn btn-danger active">
+				<input type="radio" id="idRadioText" name="rect" value="rect">Text<br>
+			</label>
 		</div>
-	
 		<canvas id="myCanvas" width="500" height="500">Dick</canvas>
-		
 	</div>
+	<input type="text" id="idTextBox" name="rect" hidden><br>
 </body>
 </html>
+
+
+
+
