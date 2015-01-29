@@ -1,3 +1,6 @@
+//þarf að skoða: Ekki hægt að gera bara einn punkt með pennannum
+// ef texti er valin, ekkert skrifað og annað tól valið þá gerist eh skrýtið
+
 $(document).ready(function(){
 	var canvas = document.getElementById("myCanvas");
 	var context = canvas.getContext("2d");
@@ -18,8 +21,11 @@ $(document).ready(function(){
 	};
 
 	$("#myCanvas").mousedown(function(e){
+		var testCol = $('#picker').css("backgroundColor");
+		console.log(testCol);
 		myDrawing.currentStartX = e.pageX - this.offsetLeft;
 		myDrawing.currentStartY = e.pageY - this.offsetTop;
+
 		if(document.getElementById('idRadioRect').checked) {
   			myDrawing.nextObject = "rect";
 		}
@@ -30,7 +36,7 @@ $(document).ready(function(){
 			myDrawing.nextObject = "circle";
 		}
 		else if(document.getElementById('idRadioPen').checked) {
-			myDrawing.tempShapes = (new Pen(0,0,0,0));
+			myDrawing.tempShapes = (new Pen(0,0,0,0)); // það er ekki hægt að gera einn punkt
 			myDrawing.nextObject = "pen";
 		}
 		else if(document.getElementById('idRadioText').checked) {
@@ -38,8 +44,9 @@ $(document).ready(function(){
 			myDrawing.tempShapes = (new Tex(e.pageX, e.pageY));
 			$("#idTextBox").css({"top": e.pageY, "left": e.pageX});
 			$("#idTextBox").show();
+			
 		}
-		
+
 		myDrawing.isDrawing = true;
 	});
 
@@ -55,18 +62,20 @@ $(document).ready(function(){
 			y = e.pageY - this.offsetTop;
 
 			if(myDrawing.nextObject === "line"){
-				myDrawing.tempShapes = (new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y));
+				myDrawing.tempShapes = (new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor));
 				//console.log("mousedown: ", myDrawing.startX, myDrawing.startY);
             	context.beginPath();
 	            context.moveTo(myDrawing.currentStartX, myDrawing.currentStartY);
 	            context.lineTo(x, y);
+	            //context.strokeStyle = myDrawing.nextColor;
 	            context.stroke();
 			}
 
 			else if(myDrawing.nextObject === "rect"){
-				myDrawing.tempShapes = (new Rect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY));
+				myDrawing.tempShapes = (new Rect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY, myDrawing.nextColor));
 				context.beginPath();
 				context.strokeRect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY); // (x,y) (width, height)
+				///context.strokeStyle = myDrawing.nextColor;
 				context.stroke();
 			}
 
@@ -87,6 +96,7 @@ $(document).ready(function(){
 			        context.lineTo(centerX + radiusX * Math.cos(a),
 			                   centerY + radiusY * Math.sin(a));
 			    }
+
 			    context.closePath();
 			    context.stroke();
 			}
@@ -109,7 +119,7 @@ $(document).ready(function(){
 
 			else if(myDrawing.nextObject === "text"){
 				//$("#idTextBox").show();
-				$("#idTextBox").css({"top": e.pageY, "left": e.pageX});
+				$("#idTextBox").css({"top": myDrawing.tempShapes.startY, "left": myDrawing.tempShapes.startX});
 
 			}
 
@@ -117,7 +127,7 @@ $(document).ready(function(){
 	});
 
 	$("#myCanvas").mouseup(function(e){
-		console.log("mouseUPPPP")
+		//console.log("mouseUPPPP")
     	myDrawing.isDrawing = false;
         myDrawing.allShapes.push(myDrawing.tempShapes);
         //console.log(myDrawing.tempShapes);
@@ -127,16 +137,18 @@ $(document).ready(function(){
 	});
 
 	var Shape = Base.extend({
-		constructor: function(startX, startY, x, y){
+		constructor: function(startX, startY, x, y, color){
 			this.x = x;
 			this.y = y;
 			this.startX = startX;
 			this.startY = startY;
+			this.objColor = color;
 		},
 		x: undefined,
 		y: undefined,
 		startX: undefined,
 		startY: undefined,
+		objColor: "black",
 	});
 
 	var Line = Shape.extend({
@@ -144,6 +156,7 @@ $(document).ready(function(){
 			context.beginPath();
 	        context.moveTo(myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY);
 	        context.lineTo(myDrawing.allShapes[i].x, myDrawing.allShapes[i].y);
+	        //context.strokeStyle = myDrawing.nextColor;
 	        context.stroke();
 		}
 	});
@@ -152,6 +165,7 @@ $(document).ready(function(){
 		draw: function(context, i){
 			context.beginPath();
 			context.strokeRect(myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY, myDrawing.allShapes[i].x, myDrawing.allShapes[i].y); // (x,y) (width, height)
+			//context.strokeStyle = myDrawing.nextColor;
 			context.stroke();
 		}
 	});
@@ -203,11 +217,14 @@ $(document).ready(function(){
 	})
 
 	var Tex = Shape.extend({
-		constructor: function(startX, startY, x, y){
-			this.myText = undefined;
+		constructor: function(startX, startY, x, y, text){
+			this.myText = text;
 		},
 		draw: function(context, i){
-
+			console.log(myDrawing.allShapes[i].myText);
+			console.log(myDrawing.allShapes[i].startX);
+			console.log(myDrawing.allShapes[i].startY);
+			context.fillText(myDrawing.allShapes[i].myText, myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY);
 		}
 	})
 
@@ -215,15 +232,30 @@ $(document).ready(function(){
 	$("#idTextBox").keypress(function(e) {
 	    if(e.which == 13) {
 	        var canvasText = $(this).val();
-	        //myDrawing.tempShapes.myText = canvasText;
-	        console.log(canvasText);
 	        context.fillText(canvasText, myDrawing.currentStartX, myDrawing.currentStartY);
-	        //context.stroke();
+
+	        myDrawing.tempShapes.myText = canvasText;
+	        myDrawing.tempShapes.startX = myDrawing.currentStartX;
+	        myDrawing.tempShapes.startY = myDrawing.currentStartY;
+	        myDrawing.allShapes.push(myDrawing.tempShapes);
+	        
 	        $("#idTextBox").val('');
 	        $("#idTextBox").hide();
 	        myDrawing.isDrawing = false;
 	    }
 	});
+
+	$('#picker').colpick({
+		flat:true,
+		layout:'hex',
+		submit:0,
+		onSubmit:function(hsb,hex,rgb,el) {
+			$(el).css('background-color', '#'+hex);
+			$(el).colpickHide();
+			console.log("jejejejjebjsbdkabfljbnalfna")
+	}
+	});
+
 
 });
 
