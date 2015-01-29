@@ -1,9 +1,10 @@
-body
-{
-	
-}
 #idTextBox
 {
 	position: absolute;
 
+}
+
+
+#myCanvas{
+	border: 2px solid black;
 }

@@ -27,11 +27,15 @@
 
 </head>
 <body>
-	<div class="col-4 input-group demo2">
-		<div class="keep-right">
-    		<span class="input-group-addon"><i></i></span>
-    	</div>
+	<div class="row">
+  		<div class="col-md-4">
+			<div class="input-group demo2">
+		   		<input type="text" value="" class="form-control" placeholder="Pic a color -->"/>
+		    	<span class="input-group-addon"><i></i></span>
+			</div>
+		</div>
 	</div>
+
 	<select id="idLineSize">
 		<option value=1>small</option>
 		<option value=3>medium</option>
@@ -39,14 +43,22 @@
 		<option value=10>xlarge</option>
 	</select>
 	<input type="text" id="idTextBox" name="rect" hidden><br>
-	<input type="radio" id="idRadioLine" name="rect" value="line" checked>Line<br>
-	<input type="radio" id="idRadioRect" name="rect" value="rect">Rect<br>
-	<input type="radio" id="idRadioCircle" name="rect" value="rect">Circle<br>
-	<input type="radio" id="idRadioPen" name="rect" value="rect">Pen<br>
-	<input type="radio" id="idRadioText" name="rect" value="rect">Text<br>
-	<canvas id="myCanvas" width="500" height="500">
-
-	</canvas>
-
+	<div class="rowa">
+		<div class="col-md-4" data-toggle="buttons">
+			<label class="btn btn-primary active">
+			<input type="radio" class="btn btn-primary "id="idRadioLine" name="rect" value="line" checked>Line<br>
+			<label class="btn btn-primary active">
+			<input type="radio" id="idRadioRect" name="rect" value="rect">Rect<br>
+			<label class="btn btn-primary active">
+			<input type="radio" id="idRadioCircle" name="rect" value="rect">Circle<br>
+			<label class="btn btn-primary active">
+			<input type="radio" id="idRadioPen" name="rect" value="rect">Pen<br>
+			<label class="btn btn-primary active">
+			<input type="radio" id="idRadioText" name="rect" value="rect">Text<br>
+		</div>
+	
+		<canvas id="myCanvas" width="500" height="500">Dick</canvas>
+		
+	</div>
 </body>
 </html>

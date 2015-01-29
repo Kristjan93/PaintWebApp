@@ -21,10 +21,13 @@ $(document).ready(function(){
 			}
 		}
 	};
-
+	//$("").click(function(){
+	//	alert("dick");
+	//});
 	$("#myCanvas").mousedown(function(e){
 		myDrawing.nextWidth = document.getElementById("idLineSize").value;
-
+		//var tool = $('#idRadioLine').attr('foo');
+		console.log("md");
 		myDrawing.currentStartX = e.pageX - this.offsetLeft;
 		myDrawing.currentStartY = e.pageY - this.offsetTop;
 
@@ -65,6 +68,7 @@ $(document).ready(function(){
 
 			if(myDrawing.nextObject === "line"){
 				myDrawing.tempShapes = (new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor, myDrawing.nextWidth));
+				console.log(myDrawing);
 
             	context.beginPath();
             	context.lineWidth = myDrawing.nextWidth;
