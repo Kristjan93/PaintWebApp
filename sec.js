@@ -1,5 +1,6 @@
 //þarf að skoða: Ekki hægt að gera bara einn punkt með pennannum
 // ef texti er valin, ekkert skrifað og annað tól valið þá gerist eh skrýtið
+// ef dropdown menu er niðri og ýtt er á canvas, þá virkar ekki draw
 
 $(document).ready(function(){
 	var canvas = document.getElementById("myCanvas");
@@ -12,17 +13,20 @@ $(document).ready(function(){
 		tempShapes: undefined,
 		nextObject: "line",
 		nextColor: "black",
+		nextWidth: 1,
 		isDrawing: false,
 		drawAllShapes: function(context){
 			for(i = 0; i < myDrawing.allShapes.length; i++){
 				myDrawing.allShapes[i].draw(context, i);
+				console.log(myDrawing.allShapes[i].objWidth);
 			}
 		}
 	};
 
 	$("#myCanvas").mousedown(function(e){
-		var testCol = $('#picker').css("backgroundColor");
-		console.log(testCol);
+		myDrawing.nextWidth = document.getElementById("idLineSize").value;
+		console.log(myDrawing.nextColor);
+
 		myDrawing.currentStartX = e.pageX - this.offsetLeft;
 		myDrawing.currentStartY = e.pageY - this.offsetTop;
 
@@ -36,7 +40,7 @@ $(document).ready(function(){
 			myDrawing.nextObject = "circle";
 		}
 		else if(document.getElementById('idRadioPen').checked) {
-			myDrawing.tempShapes = (new Pen(0,0,0,0)); // það er ekki hægt að gera einn punkt
+			myDrawing.tempShapes = (new Pen(0,0,0,0, myDrawing.nextColor, myDrawing.nextWidth)); // það er ekki hægt að gera einn punkt
 			myDrawing.nextObject = "pen";
 		}
 		else if(document.getElementById('idRadioText').checked) {
@@ -62,25 +66,32 @@ $(document).ready(function(){
 			y = e.pageY - this.offsetTop;
 
 			if(myDrawing.nextObject === "line"){
-				myDrawing.tempShapes = (new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor));
+				myDrawing.tempShapes = (new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor, myDrawing.nextWidth));
+				
 				//console.log("mousedown: ", myDrawing.startX, myDrawing.startY);
             	context.beginPath();
+            	context.lineWidth = myDrawing.nextWidth;
+            	context.strokeStyle = myDrawing.nextColor;
 	            context.moveTo(myDrawing.currentStartX, myDrawing.currentStartY);
 	            context.lineTo(x, y);
+	            
 	            //context.strokeStyle = myDrawing.nextColor;
 	            context.stroke();
 			}
 
 			else if(myDrawing.nextObject === "rect"){
-				myDrawing.tempShapes = (new Rect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY, myDrawing.nextColor));
+				myDrawing.tempShapes = (new Rect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY, myDrawing.nextColor, myDrawing.nextWidth));
 				context.beginPath();
+				context.lineWidth = myDrawing.nextWidth;
+				context.strokeStyle = myDrawing.nextColor;
 				context.strokeRect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY); // (x,y) (width, height)
+				
 				///context.strokeStyle = myDrawing.nextColor;
 				context.stroke();
 			}
 
 			else if(myDrawing.nextObject === "circle"){
-				myDrawing.tempShapes = (new Circle(myDrawing.currentStartX, myDrawing.currentStartY, x, y));
+				myDrawing.tempShapes = (new Circle(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor, myDrawing.nextWidth));
 			    var radiusX = (x - myDrawing.currentStartX) * 0.5,
 			        radiusY = (y - myDrawing.currentStartY) * 0.5,
 			        centerX = myDrawing.currentStartX + radiusX,
@@ -89,6 +100,8 @@ $(document).ready(function(){
 			        a = step,
 			        pi2 = Math.PI * 2 - step;
 			    context.beginPath();
+			    context.lineWidth = myDrawing.nextWidth;
+			    context.strokeStyle = myDrawing.nextColor;
 			    context.moveTo(centerX + radiusX * Math.cos(0),
 			               centerY + radiusY * Math.sin(0));
 
@@ -110,6 +123,9 @@ $(document).ready(function(){
 
 				for(var j = 1; j < len; j++){
 					context.beginPath();
+
+					context.lineWidth = myDrawing.nextWidth;
+					context.strokeStyle = myDrawing.nextColor;
 					context.moveTo(myDrawing.tempShapes.xArray[j-1], myDrawing.tempShapes.yArray[j-1]);
 					context.lineTo(myDrawing.tempShapes.xArray[j], myDrawing.tempShapes.yArray[j]);
 					context.closePath();
@@ -137,25 +153,30 @@ $(document).ready(function(){
 	});
 
 	var Shape = Base.extend({
-		constructor: function(startX, startY, x, y, color){
+		constructor: function(startX, startY, x, y, color, width){
 			this.x = x;
 			this.y = y;
 			this.startX = startX;
 			this.startY = startY;
 			this.objColor = color;
+			this.objWidth = width;
 		},
 		x: undefined,
 		y: undefined,
 		startX: undefined,
 		startY: undefined,
 		objColor: "black",
+		objWidth: 1,
 	});
 
 	var Line = Shape.extend({
 		draw: function(context, i){
 			context.beginPath();
+			context.lineWidth = myDrawing.allShapes[i].objWidth;
+			context.strokeStyle = myDrawing.allShapes[i].objColor;
 	        context.moveTo(myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY);
 	        context.lineTo(myDrawing.allShapes[i].x, myDrawing.allShapes[i].y);
+	        
 	        //context.strokeStyle = myDrawing.nextColor;
 	        context.stroke();
 		}
@@ -164,6 +185,8 @@ $(document).ready(function(){
 	var Rect = Shape.extend({
 		draw: function(context, i){
 			context.beginPath();
+			context.lineWidth = myDrawing.allShapes[i].objWidth;
+			context.strokeStyle = myDrawing.allShapes[i].objColor;
 			context.strokeRect(myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY, myDrawing.allShapes[i].x, myDrawing.allShapes[i].y); // (x,y) (width, height)
 			//context.strokeStyle = myDrawing.nextColor;
 			context.stroke();
@@ -182,6 +205,8 @@ $(document).ready(function(){
 	        pi2 = Math.PI * 2 - step;
 			    
 		    context.beginPath();
+		    context.lineWidth = myDrawing.allShapes[i].objWidth;
+		    context.strokeStyle = myDrawing.allShapes[i].objColor;
 		    context.moveTo(centerX + radiusX * Math.cos(0),
 		               centerY + radiusY * Math.sin(0));
 
@@ -196,14 +221,16 @@ $(document).ready(function(){
 	});
 
 	var Pen = Shape.extend({
-		constructor: function(startX, startY, x, y){
-			this.base(startX, startY, x, y);
+		constructor: function(startX, startY, x, y, color, width){
+			this.base(startX, startY, x, y, color, width);
 			this.xArray = [];
 			this.yArray = [];
 		},
 		draw: function(context, i){
 			for(var j = 0; j < this.xArray.length; j++){
 				context.beginPath();
+				context.lineWidth = myDrawing.allShapes[i].objWidth;
+				context.strokeStyle = myDrawing.allShapes[i].objColor;
 				context.moveTo(myDrawing.allShapes[i].xArray[j-1], myDrawing.allShapes[i].yArray[j-1]);
 				context.lineTo(myDrawing.allShapes[i].xArray[j], myDrawing.allShapes[i].yArray[j]);
 				context.closePath();
@@ -217,7 +244,7 @@ $(document).ready(function(){
 	})
 
 	var Tex = Shape.extend({
-		constructor: function(startX, startY, x, y, text){
+		constructor: function(startX, startY, x, y, color, width, text){
 			this.myText = text;
 		},
 		draw: function(context, i){
@@ -245,17 +272,10 @@ $(document).ready(function(){
 	    }
 	});
 
-	$('#picker').colpick({
-		flat:true,
-		layout:'hex',
-		submit:0,
-		onSubmit:function(hsb,hex,rgb,el) {
-			$(el).css('background-color', '#'+hex);
-			$(el).colpickHide();
-			console.log("jejejejjebjsbdkabfljbnalfna")
-	}
+	$('.demo2').colorpicker().on('changeColor', function(ev){
+	  	myDrawing.nextColor = ev.color.toHex();
+	  	//console.log(temp);
 	});
-
 
 });
 

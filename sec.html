@@ -5,19 +5,38 @@
     <title></title>
     <!--<link rel="stylesheet" href="style.css">-->
 	<script src ="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.js"></script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+	<script src="bootstrapColorpicker/dist/js/bootstrap-colorpicker.js"></script>
+
+
 	<script src="base.js"></script>
 	<script src="sec.js"></script>
-	<script src="colpick.js"></script>
+	<!-- Latest compiled and minified CSS -->
+
+
 	<link rel="stylesheet" type="text/css" href="sec.css"/>
-	<link rel="stylesheet" type="text/css" href="colpick.css"/>
+	<link href="bootstrapColorpicker/dist/css/bootstrap-colorpicker.min.css" rel="stylesheet">
+
 </head>
 <body>
-	<div id="picker"></div>
-	<select>
-		<option value="s">small</option>
-		<option value="m">medium</option>
-		<option value="l">large</option>
-		<option value="xl">xlarge</option>
+	<div class="col-4 input-group demo2">
+		<div class="keep-right">
+    		<span class="input-group-addon"><i></i></span>
+    	</div>
+	</div>
+	<select id="idLineSize">
+		<option value=1>small</option>
+		<option value=3>medium</option>
+		<option value=6>large</option>
+		<option value=10>xlarge</option>
 	</select>
 	<input type="text" id="idTextBox" name="rect" hidden><br>
 	<input type="radio" id="idRadioLine" name="rect" value="line" checked>Line<br>
