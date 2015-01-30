@@ -10,7 +10,7 @@ $(document).ready(function(){
 		currentStartX: undefined,
 		currentStartY: undefined,
 		allShapes: [],
-		tempShapes: undefined,
+		tempShape: undefined,
 		nextObject: "line",
 		nextColor: "black",
 		nextWidth: 1,
@@ -21,35 +21,31 @@ $(document).ready(function(){
 			}
 		}
 	};
-	//$("").click(function(){
-	//	alert("dick");
-	//});
+
 	$("#myCanvas").mousedown(function(e){
 		myDrawing.nextWidth = document.getElementById("idLineSize").value;
-		//var tool = $('#idRadioLine').attr('foo');
-		console.log("md");
+
 		myDrawing.currentStartX = e.pageX - this.offsetLeft;
 		myDrawing.currentStartY = e.pageY - this.offsetTop;
 
-		if(document.getElementById('idRadioRect').checked) {
+		if(document.getElementById('idRadioRect').checked){
   			myDrawing.nextObject = "rect";
 		}
-		else if(document.getElementById('idRadioLine').checked) {
+		else if(document.getElementById('idRadioLine').checked){
 			myDrawing.nextObject = "line";
 		}
-		else if(document.getElementById('idRadioCircle').checked) {
+		else if(document.getElementById('idRadioCircle').checked){
 			myDrawing.nextObject = "circle";
 		}
-		else if(document.getElementById('idRadioPen').checked) {
-			myDrawing.tempShapes = (new Pen(0,0,0,0, myDrawing.nextColor, myDrawing.nextWidth)); // það er ekki hægt að gera einn punkt
+		else if(document.getElementById('idRadioPen').checked){
+			myDrawing.tempShape = (new Pen(0,0,0,0, myDrawing.nextColor, myDrawing.nextWidth));
 			myDrawing.nextObject = "pen";
 		}
-		else if(document.getElementById('idRadioText').checked) {
+		else if(document.getElementById('idRadioText').checked){
 			myDrawing.nextObject = "text";
-			myDrawing.tempShapes = (new Tex(e.pageX, e.pageY, 0, 0, myDrawing.nextColor, myDrawing.nextWidth));
+			myDrawing.tempShape = (new Tex(e.pageX, e.pageY, 0, 0, myDrawing.nextColor, myDrawing.nextWidth));
 			$("#idTextBox").css({"top": e.pageY, "left": e.pageX});
 			$("#idTextBox").show();
-			
 		}
 
 		myDrawing.isDrawing = true;
@@ -67,7 +63,7 @@ $(document).ready(function(){
 			y = e.pageY - this.offsetTop;
 
 			if(myDrawing.nextObject === "line"){
-				myDrawing.tempShapes = (new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor, myDrawing.nextWidth));
+				myDrawing.tempShape = (new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor, myDrawing.nextWidth));
 				console.log(myDrawing);
 
             	context.beginPath();
@@ -79,7 +75,7 @@ $(document).ready(function(){
 			}
 
 			else if(myDrawing.nextObject === "rect"){
-				myDrawing.tempShapes = (new Rect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY, myDrawing.nextColor, myDrawing.nextWidth));
+				myDrawing.tempShape = (new Rect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY, myDrawing.nextColor, myDrawing.nextWidth));
 				context.beginPath();
 				context.lineWidth = myDrawing.nextWidth;
 				context.strokeStyle = myDrawing.nextColor;
@@ -88,7 +84,7 @@ $(document).ready(function(){
 			}
 
 			else if(myDrawing.nextObject === "circle"){
-				myDrawing.tempShapes = (new Circle(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor, myDrawing.nextWidth));
+				myDrawing.tempShape = (new Circle(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor, myDrawing.nextWidth));
 			    var radiusX = (x - myDrawing.currentStartX) * 0.5,
 			        radiusY = (y - myDrawing.currentStartY) * 0.5,
 			        centerX = myDrawing.currentStartX + radiusX,
@@ -112,34 +108,32 @@ $(document).ready(function(){
 			}
 
 			else if(myDrawing.nextObject === "pen"){
-				var len = myDrawing.tempShapes.xArray.length -1
-				myDrawing.tempShapes.xArray.push(x);
-				myDrawing.tempShapes.yArray.push(y);
+				var len = myDrawing.tempShape.xArray.length -1
+
+				myDrawing.tempShape.xArray.push(x);
+				myDrawing.tempShape.yArray.push(y);
 
 				for(var j = 1; j < len; j++){
 					context.beginPath();
-
 					context.lineWidth = myDrawing.nextWidth;
 					context.strokeStyle = myDrawing.nextColor;
-					context.moveTo(myDrawing.tempShapes.xArray[j-1], myDrawing.tempShapes.yArray[j-1]);
-					context.lineTo(myDrawing.tempShapes.xArray[j], myDrawing.tempShapes.yArray[j]);
+					context.moveTo(myDrawing.tempShape.xArray[j-1], myDrawing.tempShape.yArray[j-1]);
+					context.lineTo(myDrawing.tempShape.xArray[j], myDrawing.tempShape.yArray[j]);
 					context.closePath();
 					context.stroke();
 				}
 			}
 
 			else if(myDrawing.nextObject === "text"){
-				$("#idTextBox").css({"top": myDrawing.tempShapes.startY, "left": myDrawing.tempShapes.startX});
-
+				$("#idTextBox").css({"top": myDrawing.tempShape.startY, "left": myDrawing.tempShape.startX});
 			}
-
 		}
 	});
 
 	$("#myCanvas").mouseup(function(e){
     	myDrawing.isDrawing = false;
-        myDrawing.allShapes.push(myDrawing.tempShapes);
-        myDrawing.tempShapes = undefined;
+        myDrawing.allShapes.push(myDrawing.tempShape);
+        myDrawing.tempShape = undefined;
 	});
 
 	var Shape = Base.extend({
@@ -239,22 +233,22 @@ $(document).ready(function(){
 	})
 
 
-	$("#idTextBox").keypress(function(e) {
-	    if(e.which == 13) {
+	$("#idTextBox").keypress(function(e){
+	    if(e.which == 13 && myDrawing.isDrawing) {
 	        var canvasText = $(this).val();
 	        context.fillStyle = myDrawing.nextColor;
 	        context.font = myDrawing.nextWidth + 2 + "px Arial";
 	        context.fillText(canvasText, myDrawing.currentStartX, myDrawing.currentStartY);
 
 
-	        myDrawing.tempShapes.myText = canvasText;
-	        myDrawing.tempShapes.startX = myDrawing.currentStartX;
-	        myDrawing.tempShapes.startY = myDrawing.currentStartY;
-	        myDrawing.tempShapes.objColor = myDrawing.nextColor;
-	        myDrawing.tempShapes.objWidth = myDrawing.nextWidth + 2 + "px Arial";
+	        myDrawing.tempShape.myText = canvasText;
+	        myDrawing.tempShape.startX = myDrawing.currentStartX;
+	        myDrawing.tempShape.startY = myDrawing.currentStartY;
+	        myDrawing.tempShape.objColor = myDrawing.nextColor;
+	        myDrawing.tempShape.objWidth = myDrawing.nextWidth + 2 + "px Arial";
 
-	        console.log(myDrawing.tempShapes.objWidth);
-	        myDrawing.allShapes.push(myDrawing.tempShapes);
+	        console.log(myDrawing.tempShape.objWidth);
+	        myDrawing.allShapes.push(myDrawing.tempShape);
 	        
 	        $("#idTextBox").val('');
 	        $("#idTextBox").hide();
@@ -262,9 +256,8 @@ $(document).ready(function(){
 	    }
 	});
 
-	$('.demo2').colorpicker().on('changeColor', function(ev){
+	$(".colorPicker").colorpicker().on('changeColor', function(ev){
 	  	myDrawing.nextColor = ev.color.toHex();
-	  	//console.log(temp);
 	});
 
 });

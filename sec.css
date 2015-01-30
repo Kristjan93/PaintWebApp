@@ -12,6 +12,9 @@
 body
 {
 	background-color: white;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	 user-select: none;
 }
 
 #navBlack
@@ -31,3 +34,13 @@ body
 {
 	border-top: 2px solid black;	
 }
+
+
+
+
+
+
+
+
+
+
