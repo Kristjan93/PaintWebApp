@@ -13,6 +13,7 @@ $(document).ready(function(){
 		currentStartY: undefined,
 		allShapes: [],
 		tempShape: undefined,
+		movingShape: undefined,
 		nextObject: "line",
 		nextColor: "black",
 		nextWidth: 1,
@@ -54,7 +55,12 @@ $(document).ready(function(){
 			for(i = myDrawing.allShapes.length-1; i >= 0; i--){
 				//console.log(i);
 				if(myDrawing.allShapes[i].findMe(myDrawing.currentStartX, myDrawing.currentStartY, i)){
-					tempShape = myDrawing.allShapes[i];
+					myDrawing.movingShape = myDrawing.allShapes[i];
+
+					console.log(i);
+					//console.log("found-", myDrawing.allShapes);
+					myDrawing.allShapes.splice(i,1);
+					//console.log("found+", myDrawing.allShapes);
 					break;
 				}
 			}
@@ -137,15 +143,24 @@ $(document).ready(function(){
 			else if(myDrawing.nextObject === "text"){
 				$("#idTextBox").css({"top": myDrawing.tempShape.startY, "left": myDrawing.tempShape.startX});
 			}
-			else if(myDrawing.nextObject === "move" && myDrawing.tempShape !== undefined){
-				var xOffset = 0,
-				    yOffset = 0;
-				console.log(tempShape);
+
+			else if(myDrawing.nextObject === "move"){
+				myDrawing.tempShape = (new Rect(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x),
+					myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
+					myDrawing.movingShape.x,
+					myDrawing.movingShape.y));
+
 				context.beginPath();
-				context.lineWidth = tempShape.objWidth;
-				context.strokeStyle = tempShape.objColor;
-				context.strokeRect(tempShape.currentStartX + x, tempShape.currentStartY + y, tempShape.x + x, tempShape.y + y); // (x,y) (width, height)
+				context.lineWidth = myDrawing.nextWidth;
+				context.strokeStyle = myDrawing.nextColor;
+				context.strokeRect(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x) ,
+					myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
+					myDrawing.movingShape.x,
+					myDrawing.movingShape.y); // (x,y) (width, height)
 				context.stroke();
+
+				//myDrawing.tempShape.startX = tempShape.startX - (tempShape.startX - x);
+				//myDrawing.tempShape.startY = tempShape.startY - (tempShape.startY - y);
 
 			}
 		}
