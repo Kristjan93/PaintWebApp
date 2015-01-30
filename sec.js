@@ -1,6 +1,8 @@
 //þarf að skoða: Ekki hægt að gera bara einn punkt með pennannum
 // ef texti er valin, ekkert skrifað og annað tól valið þá gerist eh skrýtið
-// ef dropdown menu er niðri og ýtt er á canvas, þá virkar ekki draw
+// ef dropdown menu er niðri og ýtt er á canvas, þá virkar ekki draw   - FIXED
+// ef þý ýtir oft á canvasið með text valið, þá kemur "undefined" útum allt
+//Breytist um font þegar texti er teiknaður aftur
 
 $(document).ready(function(){
 	var canvas = document.getElementById("myCanvas");
@@ -47,7 +49,16 @@ $(document).ready(function(){
 			$("#idTextBox").css({"top": e.pageY, "left": e.pageX});
 			$("#idTextBox").show();
 		}
-
+		else if(document.getElementById('idRadioMove').checked){
+			myDrawing.nextObject = "move";
+			for(i = myDrawing.allShapes.length-1; i >= 0; i--){
+				//console.log(i);
+				if(myDrawing.allShapes[i].findMe(myDrawing.currentStartX, myDrawing.currentStartY, i)){
+					tempShape = myDrawing.allShapes[i];
+					break;
+				}
+			}
+		}
 		myDrawing.isDrawing = true;
 	});
 
@@ -64,7 +75,6 @@ $(document).ready(function(){
 
 			if(myDrawing.nextObject === "line"){
 				myDrawing.tempShape = (new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor, myDrawing.nextWidth));
-				console.log(myDrawing);
 
             	context.beginPath();
             	context.lineWidth = myDrawing.nextWidth;
@@ -127,13 +137,29 @@ $(document).ready(function(){
 			else if(myDrawing.nextObject === "text"){
 				$("#idTextBox").css({"top": myDrawing.tempShape.startY, "left": myDrawing.tempShape.startX});
 			}
+			else if(myDrawing.nextObject === "move" && myDrawing.tempShape !== undefined){
+				var xOffset = 0,
+				    yOffset = 0;
+				console.log(tempShape);
+				context.beginPath();
+				context.lineWidth = tempShape.objWidth;
+				context.strokeStyle = tempShape.objColor;
+				context.strokeRect(tempShape.currentStartX + x, tempShape.currentStartY + y, tempShape.x + x, tempShape.y + y); // (x,y) (width, height)
+				context.stroke();
+
+			}
 		}
 	});
 
 	$("#myCanvas").mouseup(function(e){
     	myDrawing.isDrawing = false;
-        myDrawing.allShapes.push(myDrawing.tempShape);
-        myDrawing.tempShape = undefined;
+    	if(myDrawing.tempShape === undefined){
+    		console.log("Drawing undefined - dont push on allShapes")
+    	}
+    	else{
+    		myDrawing.allShapes.push(myDrawing.tempShape);
+    	}
+    	myDrawing.tempShape = undefined;
 	});
 
 	var Shape = Base.extend({
@@ -161,6 +187,9 @@ $(document).ready(function(){
 	        context.moveTo(myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY);
 	        context.lineTo(myDrawing.allShapes[i].x, myDrawing.allShapes[i].y);
 	        context.stroke();
+		},
+		findMe: function(context, x, y, i){
+			console.log("findMeLine")
 		}
 	});
 
@@ -171,6 +200,42 @@ $(document).ready(function(){
 			context.strokeStyle = myDrawing.allShapes[i].objColor;
 			context.strokeRect(myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY, myDrawing.allShapes[i].x, myDrawing.allShapes[i].y); // (x,y) (width, height)
 			context.stroke();
+		},
+		findMe: function(x, y, i){
+			//console.log("findMeRect", myDrawing.allShapes[i]);
+			//console.log(x);
+			var xFound = false,
+			    yFound = false;
+			if(x >= myDrawing.allShapes[i].startX){
+				if(x <= (myDrawing.allShapes[i].startX + myDrawing.allShapes[i].x)){
+					//console.log("x found")
+					xFound = true;
+				}
+			}
+			else{
+				if(x >= (myDrawing.allShapes[i].startX + myDrawing.allShapes[i].x)){
+					//console.log("x found")
+					xFound = true;
+				}
+			}
+			if(y >= myDrawing.allShapes[i].startY){
+				if(y <= (myDrawing.allShapes[i].startY + myDrawing.allShapes[i].y)){
+					//console.log("Y found")
+					yFound = true;
+				}
+			}
+			else{
+				if(y >= (myDrawing.allShapes[i].startY + myDrawing.allShapes[i].y)){
+					//console.log("Y found")
+					yFound = true;
+				}
+			}
+			if(xFound && yFound){
+				return true;
+			}
+			else{
+				return false;
+			}
 		}
 	});
 
@@ -226,10 +291,21 @@ $(document).ready(function(){
 			this.myText = text;
 		},
 		draw: function(context, i){
-			context.font = myDrawing.allShapes[i].objWidth + 2 + "px Arial";
-			context.fillStyle = myDrawing.allShapes[i].objColor;
-			context.fillText(myDrawing.allShapes[i].myText, myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY);
+			// Trying to eliminate the undefined
+			if(myDrawing.allShapes[i].myDrawing === undefined){
+				//console.log("undefined")
+				myDrawing.allShapes[i].myDrawing = "";
+			}
+			else{
+				//console.log("still")
+				context.font = myDrawing.allShapes[i].objWidth + 2 + "px Arial";
+				context.fillStyle = myDrawing.allShapes[i].objColor;
+				context.fillText(myDrawing.allShapes[i].myText, myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY);
+			}	
 		}
+	})
+	var Move = Shape.extend({
+		
 	})
 
 
@@ -240,14 +316,12 @@ $(document).ready(function(){
 	        context.font = myDrawing.nextWidth + 2 + "px Arial";
 	        context.fillText(canvasText, myDrawing.currentStartX, myDrawing.currentStartY);
 
-
 	        myDrawing.tempShape.myText = canvasText;
 	        myDrawing.tempShape.startX = myDrawing.currentStartX;
 	        myDrawing.tempShape.startY = myDrawing.currentStartY;
 	        myDrawing.tempShape.objColor = myDrawing.nextColor;
 	        myDrawing.tempShape.objWidth = myDrawing.nextWidth + 2 + "px Arial";
 
-	        console.log(myDrawing.tempShape.objWidth);
 	        myDrawing.allShapes.push(myDrawing.tempShape);
 	        
 	        $("#idTextBox").val('');
