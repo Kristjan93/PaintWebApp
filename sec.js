@@ -144,7 +144,7 @@ $(document).ready(function(){
 				$("#idTextBox").css({"top": myDrawing.tempShape.startY, "left": myDrawing.tempShape.startX});
 			}
 
-			else if(myDrawing.nextObject === "move"){
+			else if(myDrawing.nextObject === "move" && myDrawing.movingShape !== undefined){
 				myDrawing.tempShape = (new Rect(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x),
 					myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
 					myDrawing.movingShape.x,
@@ -175,6 +175,7 @@ $(document).ready(function(){
     		myDrawing.allShapes.push(myDrawing.tempShape);
     	}
     	myDrawing.tempShape = undefined;
+    	myDrawing.movingShape = undefined;
 	});
 
 	var Shape = Base.extend({
@@ -245,6 +246,7 @@ $(document).ready(function(){
 					yFound = true;
 				}
 			}
+
 			if(xFound && yFound){
 				return true;
 			}
