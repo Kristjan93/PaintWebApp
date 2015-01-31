@@ -19,8 +19,11 @@ $(document).ready(function(){
 		nextWidth: 1,
 		isDrawing: false,
 		drawAllShapes: function(context){
+			context.clearRect(0, 0, canvas.width, canvas.height);
 			for(i = 0; i < myDrawing.allShapes.length; i++){
-				myDrawing.allShapes[i].draw(context, i);
+				if(myDrawing.allShapes[i] !== undefined){
+					myDrawing.allShapes[i].draw(context, i);
+				}
 			}
 		}
 	};
@@ -41,12 +44,12 @@ $(document).ready(function(){
 			myDrawing.nextObject = "circle";
 		}
 		else if(document.getElementById('idRadioPen').checked){
-			myDrawing.tempShape = (new Pen(0,0,0,0, myDrawing.nextColor, myDrawing.nextWidth));
+			myDrawing.tempShape = (new Pen(0,0,0,0, myDrawing.nextColor, myDrawing.nextWidth, "pen"));
 			myDrawing.nextObject = "pen";
 		}
 		else if(document.getElementById('idRadioText').checked){
 			myDrawing.nextObject = "text";
-			myDrawing.tempShape = (new Tex(e.pageX, e.pageY, 0, 0, myDrawing.nextColor, myDrawing.nextWidth));
+			myDrawing.tempShape = (new Tex(e.pageX, e.pageY, 0, 0, myDrawing.nextColor, myDrawing.nextWidth, "text"));
 			$("#idTextBox").css({"top": e.pageY, "left": e.pageX});
 			$("#idTextBox").show();
 		}
@@ -56,10 +59,12 @@ $(document).ready(function(){
 				//console.log(i);
 				if(myDrawing.allShapes[i].findMe(myDrawing.currentStartX, myDrawing.currentStartY, i)){
 					myDrawing.movingShape = myDrawing.allShapes[i];
-
+					myDrawing.tempShape = myDrawing.allShapes[i];
+					console.log(myDrawing.movingShape.objName);
 					console.log(i);
-					//console.log("found-", myDrawing.allShapes);
+					//console.log(myDrawing.allShapes[i]);
 					myDrawing.allShapes.splice(i,1);
+					//myDrawing.allShapes.push(myDrawing.tempShape);
 					//console.log("found+", myDrawing.allShapes);
 					break;
 				}
@@ -71,16 +76,23 @@ $(document).ready(function(){
 	$("#myCanvas").mousemove(function(e){
 
 		if(myDrawing.isDrawing === true){
-			context.clearRect(0, 0, canvas.width, canvas.height);
+			
 
 			//keeps previous shapes on the canvas
 			myDrawing.drawAllShapes(context);
+			undoRedo.resetAll();
 
 			x = e.pageX - this.offsetLeft;
 			y = e.pageY - this.offsetTop;
 
 			if(myDrawing.nextObject === "line"){
-				myDrawing.tempShape = (new Line(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor, myDrawing.nextWidth));
+				myDrawing.tempShape = (new Line(myDrawing.currentStartX,
+					myDrawing.currentStartY,
+					x,
+					y,
+					myDrawing.nextColor,
+					myDrawing.nextWidth,
+					"line"));
 
             	context.beginPath();
             	context.lineWidth = myDrawing.nextWidth;
@@ -91,7 +103,14 @@ $(document).ready(function(){
 			}
 
 			else if(myDrawing.nextObject === "rect"){
-				myDrawing.tempShape = (new Rect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY, myDrawing.nextColor, myDrawing.nextWidth));
+				myDrawing.tempShape = (new Rect(myDrawing.currentStartX,
+					myDrawing.currentStartY,
+					x - myDrawing.currentStartX,
+					y - myDrawing.currentStartY,
+					myDrawing.nextColor,
+					myDrawing.nextWidth,
+					"rect"));
+				
 				context.beginPath();
 				context.lineWidth = myDrawing.nextWidth;
 				context.strokeStyle = myDrawing.nextColor;
@@ -100,7 +119,13 @@ $(document).ready(function(){
 			}
 
 			else if(myDrawing.nextObject === "circle"){
-				myDrawing.tempShape = (new Circle(myDrawing.currentStartX, myDrawing.currentStartY, x, y, myDrawing.nextColor, myDrawing.nextWidth));
+				myDrawing.tempShape = (new Circle(myDrawing.currentStartX,
+					myDrawing.currentStartY,
+					x,
+					y,
+					myDrawing.nextColor,
+					myDrawing.nextWidth,
+					"circle"));
 			    var radiusX = (x - myDrawing.currentStartX) * 0.5,
 			        radiusY = (y - myDrawing.currentStartY) * 0.5,
 			        centerX = myDrawing.currentStartX + radiusX,
@@ -143,49 +168,53 @@ $(document).ready(function(){
 			else if(myDrawing.nextObject === "text"){
 				$("#idTextBox").css({"top": myDrawing.tempShape.startY, "left": myDrawing.tempShape.startX});
 			}
-
+			//console.log(myDrawing.movingShape);
 			else if(myDrawing.nextObject === "move" && myDrawing.movingShape !== undefined){
-				myDrawing.tempShape = (new Rect(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x),
-					myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
-					myDrawing.movingShape.x,
-					myDrawing.movingShape.y));
+				//console.log(myDrawing.movingShape.objName);
+				if(myDrawing.movingShape.objName === "rect"){
+					//console.log(myDrawing.movingShape)
+					myDrawing.tempShape = (new Rect(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x),
+						myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
+						myDrawing.movingShape.x,
+						myDrawing.movingShape.y,
+						myDrawing.movingShape.objColor,
+						myDrawing.movingShape.objWidth,
+						"rect"));
 
-				context.beginPath();
-				context.lineWidth = myDrawing.nextWidth;
-				context.strokeStyle = myDrawing.nextColor;
-				context.strokeRect(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x) ,
-					myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
-					myDrawing.movingShape.x,
-					myDrawing.movingShape.y); // (x,y) (width, height)
-				context.stroke();
+					context.beginPath();
+					context.lineWidth = myDrawing.movingShape.objWidth;
+					context.strokeStyle = myDrawing.movingShape.objColor;
+					context.strokeRect(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x) ,
+						myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
+						myDrawing.movingShape.x,
+						myDrawing.movingShape.y);
+					context.stroke();
+				}
+				if(myDrawing.movingShape === "line"){
 
-				//myDrawing.tempShape.startX = tempShape.startX - (tempShape.startX - x);
-				//myDrawing.tempShape.startY = tempShape.startY - (tempShape.startY - y);
-
+				}
 			}
 		}
 	});
 
 	$("#myCanvas").mouseup(function(e){
     	myDrawing.isDrawing = false;
-    	if(myDrawing.tempShape === undefined){
-    		console.log("Drawing undefined - dont push on allShapes")
-    	}
-    	else{
-    		myDrawing.allShapes.push(myDrawing.tempShape);
-    	}
+
+    	myDrawing.allShapes.push(myDrawing.tempShape);
+    	
     	myDrawing.tempShape = undefined;
     	myDrawing.movingShape = undefined;
 	});
 
 	var Shape = Base.extend({
-		constructor: function(startX, startY, x, y, color, width){
+		constructor: function(startX, startY, x, y, color, width, name){
 			this.x = x;
 			this.y = y;
 			this.startX = startX;
 			this.startY = startY;
 			this.objColor = color;
 			this.objWidth = width;
+			this.objName = name;
 		},
 		x: undefined,
 		y: undefined,
@@ -193,6 +222,7 @@ $(document).ready(function(){
 		startY: undefined,
 		objColor: "black",
 		objWidth: 1,
+		objName: "line",
 	});
 
 	var Line = Shape.extend({
@@ -349,6 +379,32 @@ $(document).ready(function(){
 
 	$(".colorPicker").colorpicker().on('changeColor', function(ev){
 	  	myDrawing.nextColor = ev.color.toHex();
+	});
+
+	var undoRedo = {
+			undoneItems: [],
+			popItem: function(){
+				undoRedo.undoneItems.push( myDrawing.allShapes.pop());
+				myDrawing.drawAllShapes(context);
+			},
+			undoItem: function(){
+				myDrawing.allShapes.push(undoRedo.undoneItems[0]);
+				undoRedo.undoneItems.splice(0,1);
+				myDrawing.drawAllShapes(context);
+			},
+			resetAll: function(){
+				undoRedo.undoneItems = [];
+			}
+		};
+
+	$("#btnUndo").click(function() {
+		console.log("here");
+		undoRedo.popItem();
+	});
+
+	$("#btnRedo").click(function(){
+		console.log("here2");
+		undoRedo.undoItem();
 	});
 
 });
