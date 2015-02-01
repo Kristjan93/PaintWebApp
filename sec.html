@@ -21,7 +21,7 @@
 </head>
 <body>
 
-	<div  class="row rainbow" >
+	<div class="row rainbow" >
   		<div class="col-md-4">
 			<div class="input-group colorPicker">
 		   		<input type="text" value="" class="form-control" placeholder="Pic a color -->"/>
@@ -36,69 +36,66 @@
 			  <button type="button" id="btnClear" class="btn btn-danger pull-right">Clear All</button>
 		</div>
 	</div>
-
-	<select id="idLineSize">
+	<select class="selectpicker" id="idLineSize">
 		<option value=1>small</option>
 		<option value=3>medium</option>
 		<option value=6>large</option>
 		<option value=10>xlarge</option>
 	</select>
-	<b>Pen size</b>
+	<b>Line size</b>
 
 	<div class="row">
-		<div class="col-md-4 allButtons" data-toggle="buttons" >
-			<label class="btn btn-primary active">
-				<input type="radio" class="btn btn-primary "id="idRadioLine" name="rect" value="line" checked>Line<br>
-			</label>
-			<label class="btn btn-success active">
-				<input type="radio" id="idRadioRect" name="rect" value="rect">Rect<br>
-			</label>
-			<label class="btn btn-info active">
-				<input type="radio" id="idRadioCircle" name="rect" value="rect">Circle<br>
-			</label>
-			<label class="btn btn-warning active">
-				<input type="radio" id="idRadioPen" name="rect" value="rect">Pen<br>
-			</label>
-			<label class="btn btn-danger active">
-				<input type="radio" id="idRadioText" name="rect" value="rect">Text<br>
-			</label>
-			<label class="btn btn-default active">
-				<input type="radio" id="idRadioMove" name="rect" value="move">Move<br>
-			</label>
-
-			<div>
-				
-				<button type="button" id="Load" class="btn btn-default">Load</button>
-				<button type="button" id="SetOnCanvas" class="btn btn-default">Set To Canvas</button>
-			</div>
-			<div>
+		<div id="lefthandSide" class="col-md-4 allButtons">
+			<span data-toggle="buttons">
+				<label class="btn btn-primary active">
+					<input type="radio" class="btn btn-primary "id="idRadioLine" name="rect" value="line" checked>Line<br>
+				</label>
+				<label class="btn btn-success active">
+					<input type="radio" id="idRadioRect" name="rect" value="rect">Rect<br>
+				</label>
+				<label class="btn btn-info active">
+					<input type="radio" id="idRadioCircle" name="rect" value="rect">Circle<br>
+				</label>
+				<label class="btn btn-warning active">
+					<input type="radio" id="idRadioPen" name="rect" value="rect">Pen<br>
+				</label>
+				<label class="btn btn-danger active">
+					<input type="radio" id="idRadioText" name="rect" value="rect">Text<br>
+				</label>
+				<label class="btn btn-default active">
+					<input type="radio" id="idRadioMove" name="rect" value="move">Move<br>
+				</label>
+			</span>
+			<div id="leftHandSideDiv">
 				<input type="text" id="userName" placeholder="username">
-				<button type="button" id="subUser" class="btn btn-default">Refresh Info</button>
+				<button type="button" id="subUser" class="btn btn-default">Log in</button>
 			</div>
-			<div>
-				<b>Saved Pictures</b>
+			<div class="hiddenDiv">
+				<b>My Pictures</b>
 				<select id="pictures">
 				</select>
 			</div>
-			<div>
-				<b>Saved Elements</b>
+			<div class="hiddenDiv">
+				<b>My Elements</b>
 				<select id="elements">
 				</select>
 			</div>
-
-			<div id="hiddenDiv" data-toggle="buttons">
+			<div class="hiddenDiv">
+				<button type="button" id="loadPic" class="btn btn-default">Load My Picture</button>
+				<button type="button" id="LoadElem" class="btn btn-default">Load My Elemnt</button>
+			</div>
+			<div class="hiddenDiv">
 				<button type="button" id="Save" class="btn btn-default">Save</button>
-				<input type="text" id="saveName">
+				<input type="text" id="saveName" placeholder="Name your work!">
 
-				<label class="btn btn-default active">
-					<input type="radio" id="savePic" name="load" value="load">Picture<br>
-				</label>
-				<label class="btn btn-default active">
-					<input type="radio" id="saveElem" name="load" value="load">Element<br>
-				</label>
+				<input type="radio" id="savePic" name="foo" value="load"/>
+    			<label for="savePic">Picture</label>
+
+    		<input type="radio" name="foo" value="load" id="saveElem" />
+    			<label for="saveElem">Element</label>
 			</div>
 		</div>
-		<canvas id="myCanvas" width="700" height="500">Dick</canvas>
+		<canvas id="myCanvas" width="700" height="500"></canvas>
 	</div>
 	<input type="text" id="idTextBox" name="rect" hidden><br>
 </body>

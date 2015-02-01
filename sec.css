@@ -35,11 +35,15 @@ body
 	border-top: 2px solid black;	
 }
 
+.hiddenDiv
+{
+	display: none;
+}
 
-
-
-
-
+#canvasReloder
+{
+	margin-top: 100px;
+}
 
 
 
