@@ -1,8 +1,9 @@
 //þarf að skoða: Ekki hægt að gera bara einn punkt með pennannum
 // ef texti er valin, ekkert skrifað og annað tól valið þá gerist eh skrýtið
 // ef dropdown menu er niðri og ýtt er á canvas, þá virkar ekki draw   - FIXED
-// ef þý ýtir oft á canvasið með text valið, þá kemur "undefined" útum allt
+// ef þý ýtir oft á canvasið með text valið, þá kemur "undefined" útum allt - FIXED
 //Breytist um font þegar texti er teiknaður aftur
+
 
 $(document).ready(function(){
 	var canvas = document.getElementById("myCanvas");
@@ -33,6 +34,7 @@ $(document).ready(function(){
 
 		myDrawing.currentStartX = e.pageX - this.offsetLeft;
 		myDrawing.currentStartY = e.pageY - this.offsetTop;
+		//console.log(myDrawing.tempShape, myDrawing.movingShape);
 
 		if(document.getElementById('idRadioRect').checked){
   			myDrawing.nextObject = "rect";
@@ -49,24 +51,33 @@ $(document).ready(function(){
 		}
 		else if(document.getElementById('idRadioText').checked){
 			myDrawing.nextObject = "text";
-			myDrawing.tempShape = (new Tex(e.pageX, e.pageY, 0, 0, myDrawing.nextColor, myDrawing.nextWidth, "text"));
+			myDrawing.tempShape = (new Tex(e.pageX, e.pageY, 0, 0, myDrawing.nextColor, myDrawing.nextWidth, "text", ""));
 			$("#idTextBox").css({"top": e.pageY, "left": e.pageX});
 			$("#idTextBox").show();
 		}
 		else if(document.getElementById('idRadioMove').checked){
 			myDrawing.nextObject = "move";
-			for(i = myDrawing.allShapes.length-1; i >= 0; i--){
-				//console.log(i);
-				if(myDrawing.allShapes[i].findMe(myDrawing.currentStartX, myDrawing.currentStartY, i)){
-					myDrawing.movingShape = myDrawing.allShapes[i];
-					myDrawing.tempShape = myDrawing.allShapes[i];
-					console.log(myDrawing.movingShape.objName);
-					console.log(i);
+			//console.log("move:::::", myDrawing.allShapes.length)
+			for(var a = myDrawing.allShapes.length-1; a >= 0; a--){
+				//console.log("i:", a)
+				//console.log(myDrawing.allShapes[a]);
+				if(myDrawing.allShapes[a].findMe(myDrawing.currentStartX, myDrawing.currentStartY, myDrawing.allShapes[a])){
+					console.log("foundddddddddd", myDrawing.allShapes[a]);
+					myDrawing.movingShape = myDrawing.allShapes[a];
+					myDrawing.tempShape = myDrawing.allShapes[a];
+					//console.log(myDrawing.movingShape.objName);
+					if(myDrawing.tempShape.objName === "pen"){
+						myDrawing.tempShape.x = myDrawing.currentStartX 
+						myDrawing.tempShape.y = myDrawing.currentStartY 
+					}
 					//console.log(myDrawing.allShapes[i]);
-					myDrawing.allShapes.splice(i,1);
+					myDrawing.allShapes.splice(a,1);
 					//myDrawing.allShapes.push(myDrawing.tempShape);
 					//console.log("found+", myDrawing.allShapes);
 					break;
+				}
+				else{
+					console.log("NOT FOUND")
 				}
 			}
 		}
@@ -149,12 +160,12 @@ $(document).ready(function(){
 			}
 
 			else if(myDrawing.nextObject === "pen"){
-				var len = myDrawing.tempShape.xArray.length -1
+				var len = myDrawing.tempShape.xArray.length-1
 
 				myDrawing.tempShape.xArray.push(x);
 				myDrawing.tempShape.yArray.push(y);
 
-				for(var j = 1; j < len; j++){
+				for(var j = 0; j < len; j++){
 					context.beginPath();
 					context.lineWidth = myDrawing.nextWidth;
 					context.strokeStyle = myDrawing.nextColor;
@@ -190,8 +201,47 @@ $(document).ready(function(){
 						myDrawing.movingShape.y);
 					context.stroke();
 				}
-				if(myDrawing.movingShape === "line"){
+				if(myDrawing.movingShape.objName === "text"){
+					myDrawing.tempShape = (new Tex(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x),
+						myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
+						myDrawing.movingShape.x,
+						myDrawing.movingShape.y,
+						myDrawing.movingShape.objColor,
+						myDrawing.movingShape.objWidth,
+						"text",
+						myDrawing.movingShape.myText));
 
+					context.font = myDrawing.movingShape.objWidth;
+					context.fillStyle = myDrawing.movingShape.objColor;
+					context.fillText(myDrawing.movingShape.myText,
+						myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x),
+						myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y));
+				}
+				if(myDrawing.movingShape.objName === "pen"){
+					console.log("movig peepeppepennn")
+					console.log("a:", myDrawing.tempShape);
+					console.log("off:", (myDrawing.movingShape.x - x))
+					console.log("x:", x)
+					console.log("stX:", myDrawing.movingShape.x)
+					for(var j = 0; j < myDrawing.movingShape.xArray.length; j++){
+						console.log(myDrawing.movingShape.xArray[j], "-", (myDrawing.movingShape.x - x), "=", myDrawing.movingShape.xArray[j] - (myDrawing.movingShape.x - x));
+						//console.log(myDrawing.movingShape.xArray[j] + (myDrawing.movingShape.xArray[j] - x))
+						myDrawing.tempShape.xArray[j] = myDrawing.movingShape.xArray[j] - (myDrawing.movingShape.x - x);
+						myDrawing.tempShape.yArray[j] = myDrawing.movingShape.yArray[j] - (myDrawing.movingShape.y - y);
+						//console.log(x, y);
+						context.beginPath();
+						context.lineWidth = myDrawing.movingShape.objWidth;
+						context.strokeStyle = myDrawing.movingShape.objColor;
+						//context.moveTo(myDrawing.tempShape.xArray[j-1], myDrawing.tempShape.yArray[j-1]);
+						//context.lineTo(myDrawing.tempShape.xArray[j], myDrawing.tempShape.yArray[j]);
+						context.moveTo(myDrawing.movingShape.xArray[j-1] - (myDrawing.movingShape.x - x), myDrawing.tempShape.yArray[j-1] - (myDrawing.movingShape.y - y));
+						context.lineTo(myDrawing.movingShape.xArray[j] - (myDrawing.movingShape.x - x), myDrawing.tempShape.yArray[j] - (myDrawing.movingShape.y - y));
+						context.closePath();
+						context.stroke();
+						myDrawing.tempShape.x = myDrawing.tempShape.x - (myDrawing.movingShape.x - x);
+						myDrawing.tempShape.y = myDrawing.tempShape.y - (myDrawing.movingShape.y - y);
+					}
+					console.log("b:",myDrawing.tempShape);
 				}
 			}
 		}
@@ -200,8 +250,13 @@ $(document).ready(function(){
 	$("#myCanvas").mouseup(function(e){
     	myDrawing.isDrawing = false;
 
-    	myDrawing.allShapes.push(myDrawing.tempShape);
-    	
+    	//console.log("a------:", myDrawing.allShapes)
+		//console.log(myDrawing.tempShape)
+    	if(myDrawing.tempShape !== undefined){
+    		
+    		myDrawing.allShapes.push(myDrawing.tempShape);
+    	} 
+    	console.log("b--------:", myDrawing.allShapes)   	
     	myDrawing.tempShape = undefined;
     	myDrawing.movingShape = undefined;
 	});
@@ -223,6 +278,43 @@ $(document).ready(function(){
 		objColor: "black",
 		objWidth: 1,
 		objName: "line",
+		findMe: function(x, y, obj){
+			//console.log("findMeRect", myDrawing.allShapes[i]);
+			//console.log("found");
+			var xFound = false,
+			    yFound = false;
+			if(x >= obj.startX){
+				if(x <= (obj.startX + obj.x)){
+					//console.log("x found")
+					xFound = true;
+				}
+			}
+			else{
+				if(x >= (obj.startX + obj.x)){
+					//console.log("x found")
+					xFound = true;
+				}
+			}
+			if(y >= obj.startY){
+				if(y <= (obj.startY + obj.y)){
+					//console.log("Y found")
+					yFound = true;
+				}
+			}
+			else{
+				if(y >= (obj.startY + obj.y)){
+					//console.log("Y found")
+					yFound = true;
+				}
+			}
+
+			if(xFound && yFound){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
 	});
 
 	var Line = Shape.extend({
@@ -246,43 +338,6 @@ $(document).ready(function(){
 			context.strokeStyle = myDrawing.allShapes[i].objColor;
 			context.strokeRect(myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY, myDrawing.allShapes[i].x, myDrawing.allShapes[i].y); // (x,y) (width, height)
 			context.stroke();
-		},
-		findMe: function(x, y, i){
-			//console.log("findMeRect", myDrawing.allShapes[i]);
-			//console.log(x);
-			var xFound = false,
-			    yFound = false;
-			if(x >= myDrawing.allShapes[i].startX){
-				if(x <= (myDrawing.allShapes[i].startX + myDrawing.allShapes[i].x)){
-					//console.log("x found")
-					xFound = true;
-				}
-			}
-			else{
-				if(x >= (myDrawing.allShapes[i].startX + myDrawing.allShapes[i].x)){
-					//console.log("x found")
-					xFound = true;
-				}
-			}
-			if(y >= myDrawing.allShapes[i].startY){
-				if(y <= (myDrawing.allShapes[i].startY + myDrawing.allShapes[i].y)){
-					//console.log("Y found")
-					yFound = true;
-				}
-			}
-			else{
-				if(y >= (myDrawing.allShapes[i].startY + myDrawing.allShapes[i].y)){
-					//console.log("Y found")
-					yFound = true;
-				}
-			}
-
-			if(xFound && yFound){
-				return true;
-			}
-			else{
-				return false;
-			}
 		}
 	});
 
@@ -314,8 +369,8 @@ $(document).ready(function(){
 	});
 
 	var Pen = Shape.extend({
-		constructor: function(startX, startY, x, y, color, width){
-			this.base(startX, startY, x, y, color, width);
+		constructor: function(startX, startY, x, y, color, width, name){
+			this.base(startX, startY, x, y, color, width, name);
 			this.xArray = [];
 			this.yArray = [];
 		},
@@ -329,12 +384,23 @@ $(document).ready(function(){
 				context.closePath();
 				context.stroke();
 			}
+		},
+		findMe: function(x, y, obj){
+			//console.log(obj)
+			for(i = 0; i < obj.xArray.length; i++){
+				if(obj.xArray[i] < x+5 && obj.xArray[i] > x-5){
+					if(obj.yArray[i] < y+8 && obj.yArray[i] > y-8){
+						return true
+					}
+				}
+			}
+			return false
 		}
 	})
 
 	var Tex = Shape.extend({
-		constructor: function(startX, startY, x, y, color, width, text){
-			this.base(startX, startY, x, y, color, width);
+		constructor: function(startX, startY, x, y, color, width, name, text){
+			this.base(startX, startY, x, y, color, width, name);
 			this.myText = text;
 		},
 		draw: function(context, i){
@@ -345,14 +411,47 @@ $(document).ready(function(){
 			}
 			else{
 				//console.log("still")
-				context.font = myDrawing.allShapes[i].objWidth + 2 + "px Arial";
+				//context.font = myDrawing.nextWidth + 2 + "px Arial";
+				context.font = myDrawing.allShapes[i].objWidth;
 				context.fillStyle = myDrawing.allShapes[i].objColor;
 				context.fillText(myDrawing.allShapes[i].myText, myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY);
+
+				//context.strokeRect(myDrawing.allShapes[i].startX,
+				//	myDrawing.allShapes[i].startY - 15,
+				//	context.measureText(myDrawing.allShapes[i].myText).width,
+				//	20);
 			}	
+		},
+		findHeight: function(h){
+			//console.log(h)
+			if(h == 1){
+				return 15
+			}
+			else if(h == 3){
+				return 30
+			}
+			else if(h == 6){
+				return 50
+			}
+			else if(h == 10){
+				return 70
+			}
+		},
+		findOffset: function(h){
+			//console.log(h)
+			if(h == 1){
+				return 13
+			}
+			else if(h == 3){
+				return 25
+			}
+			else if(h == 6){
+				return 45
+			}
+			else if(h == 10){
+				return 70
+			}
 		}
-	})
-	var Move = Shape.extend({
-		
 	})
 
 
@@ -368,12 +467,24 @@ $(document).ready(function(){
 	        myDrawing.tempShape.startY = myDrawing.currentStartY;
 	        myDrawing.tempShape.objColor = myDrawing.nextColor;
 	        myDrawing.tempShape.objWidth = myDrawing.nextWidth + 2 + "px Arial";
+	        myDrawing.tempShape.x = context.measureText(canvasText).width;
+	        myDrawing.tempShape.y = myDrawing.tempShape.y - myDrawing.tempShape.findOffset(myDrawing.nextWidth);
 
 	        myDrawing.allShapes.push(myDrawing.tempShape);
+
+
+        	//context.strokeRect(myDrawing.tempShape.startX,
+			//	myDrawing.tempShape.startY - myDrawing.tempShape.findOffset(myDrawing.nextWidth),
+			//	context.measureText(canvasText).width,
+			//	myDrawing.tempShape.findHeight(myDrawing.nextWidth));//context.measureText(myDrawing.allShapes[i].myText).height); // (x,y) (width, height)
+				//console.log(context.measureText(myDrawing.allShapes[i].myText).width);
+				//console.log(context.measureText(myDrawing.allShapes[i].myText).height);
+
 	        
 	        $("#idTextBox").val('');
 	        $("#idTextBox").hide();
 	        myDrawing.isDrawing = false;
+	        myDrawing.tempShape = undefined;
 	    }
 	});
 
@@ -398,13 +509,153 @@ $(document).ready(function(){
 		};
 
 	$("#btnUndo").click(function() {
-		console.log("here");
+		//console.log("here");
 		undoRedo.popItem();
 	});
 
 	$("#btnRedo").click(function(){
-		console.log("here2");
+		//console.log("here2");
 		undoRedo.undoItem();
+	});
+	$("#btnClear").click(function(){
+		undoRedo.resetAll();
+		myDrawing.clearAllShapes();
+		myDrawing.drawAllShapes(context);
+	});
+
+
+
+
+	var userName;
+	$("#subUser").click(function(){
+		userName = $("#userName").val();
+		$("#hiddenDiv").show();
+
+		updateUserInfo(userName);
+	});
+
+	$("#Save").click(function(){
+			var nameOfSave = $("#saveName").val();
+			console.log(nameOfSave);
+
+			if(document.getElementById('savePic').checked){
+				var stringifiedArray = JSON.stringify(myDrawing.allShapes);
+				var param = { 
+					"user": userName, // You should use your own username!
+					"name": nameOfSave,
+					"content": stringifiedArray,
+					"template": false
+				};
+
+				$.ajax({
+					type: "POST",
+					contentType: "application/json; charset=utf-8",
+					url: "http://whiteboard.apphb.com/Home/Save",
+					data: param,
+					dataType: "jsonp",
+					crossDomain: true,
+					success: function (data) {
+						console.log("pic saved");
+					},
+					error: function (xhr, err) {
+						alert("it did not work");
+					}
+				});
+			}
+			else {
+				var stringifiedArray = JSON.stringify(myDrawing.allShapes);
+				var param = { 
+					"user": userName, // You should use your own username!
+					"name": nameOfSave,
+					"content": stringifiedArray,
+					"template": true
+				};
+
+				$.ajax({
+					type: "POST",
+					contentType: "application/json; charset=utf-8",
+					url: "http://whiteboard.apphb.com/Home/Save",
+					data: param,
+					dataType: "jsonp",
+					crossDomain: true,
+					success: function (data) {
+						console.log("element saved");
+					},
+					error: function (xhr, err) {
+						alert("it did not work");
+					}
+				});
+			}
+
+	});
+
+	var updateUserInfo = function(userName){
+			var param = { 
+				"user": userName, // You should use your own username!
+				"template": false
+			};
+
+			$.ajax({
+				type: "POST",
+				contentType: "application/json; charset=utf-8",
+				url: "http://whiteboard.apphb.com/Home/GetList",
+				data: param,
+				dataType: "jsonp",
+				crossDomain: true,
+				success: function (data) {
+					for(var i = 0; i < data.length; i++)
+					{
+						$('#pictures').append($('<option>', { value : data[i].ID }).text(data[i].WhiteboardTitle)); 
+					}
+				},
+				error: function (xhr, err) {
+					alert("geting id did not work");
+				}
+			});
+
+			param = { 
+				"user": userName, // You should use your own username!
+				"template": true
+			};
+
+			$.ajax({
+				type: "POST",
+				contentType: "application/json; charset=utf-8",
+				url: "http://whiteboard.apphb.com/Home/GetList",
+				data: param,
+				dataType: "jsonp",
+				crossDomain: true,
+				success: function (data) {
+					for(var i = 0; i < data.length; i++)
+					{
+						$('#elements').append($('<option>', { value : data[i].ID }).text(data[i].WhiteboardTitle)); 
+					}
+				},
+				error: function (xhr, err) {
+					alert("geting id did not work");
+				}
+			});
+	};
+
+	$("#SetOnCanvas").click(function(){
+			var param = { 
+				"id": 1972
+			};
+
+			$.ajax({
+				type: "POST",
+				contentType: "application/json; charset=utf-8",
+				url: "http://whiteboard.apphb.com/Home/GetWhiteboard",
+				data: param,
+				dataType: "jsonp",
+				crossDomain: true,
+				success: function (data) {
+					console.log(data);
+				},
+				error: function (xhr, err) {
+					console.log("somthing whent wrong");
+				}
+			});
 	});
 
 });
