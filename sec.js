@@ -19,13 +19,19 @@ $(document).ready(function(){
 		nextColor: "black",
 		nextWidth: 1,
 		isDrawing: false,
+		moveX: undefined,
+		moveY: undefined,
 		drawAllShapes: function(context){
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			for(i = 0; i < myDrawing.allShapes.length; i++){
 				if(myDrawing.allShapes[i] !== undefined){
-					myDrawing.allShapes[i].draw(context, i);
+					myDrawing.allShapes[i].draw(context, myDrawing.allShapes[i]);
+					//console.log("kfkkkkkkkkkkk",myDrawing.allShapes[myDrawing.allShapes.length - 1].objName);
 				}
 			}
+		},
+		clearAllShapes: function(){
+			myDrawing.allShapes = [];
 		}
 	};
 
@@ -57,19 +63,22 @@ $(document).ready(function(){
 		}
 		else if(document.getElementById('idRadioMove').checked){
 			myDrawing.nextObject = "move";
+			myDrawing.moveX = myDrawing.currentStartX
+			myDrawing.moveY = myDrawing.currentStartY
 			//console.log("move:::::", myDrawing.allShapes.length)
 			for(var a = myDrawing.allShapes.length-1; a >= 0; a--){
 				//console.log("i:", a)
 				//console.log(myDrawing.allShapes[a]);
 				if(myDrawing.allShapes[a].findMe(myDrawing.currentStartX, myDrawing.currentStartY, myDrawing.allShapes[a])){
-					console.log("foundddddddddd", myDrawing.allShapes[a]);
+					//console.log("foundddddddddd", myDrawing.allShapes[a]);
 					myDrawing.movingShape = myDrawing.allShapes[a];
 					myDrawing.tempShape = myDrawing.allShapes[a];
+					myDrawing.tempShape = myDrawing.tempShape;
 					//console.log(myDrawing.movingShape.objName);
-					if(myDrawing.tempShape.objName === "pen"){
-						myDrawing.tempShape.x = myDrawing.currentStartX 
-						myDrawing.tempShape.y = myDrawing.currentStartY 
-					}
+					//if(myDrawing.tempShape.objName === "pen"){
+						//myDrawing.tempShape.x = myDrawing.currentStartX 
+						//myDrawing.tempShape.y = myDrawing.currentStartY
+					//}
 					//console.log(myDrawing.allShapes[i]);
 					myDrawing.allShapes.splice(a,1);
 					//myDrawing.allShapes.push(myDrawing.tempShape);
@@ -104,13 +113,7 @@ $(document).ready(function(){
 					myDrawing.nextColor,
 					myDrawing.nextWidth,
 					"line"));
-
-            	context.beginPath();
-            	context.lineWidth = myDrawing.nextWidth;
-            	context.strokeStyle = myDrawing.nextColor;
-	            context.moveTo(myDrawing.currentStartX, myDrawing.currentStartY);
-	            context.lineTo(x, y);
-	            context.stroke();
+				myDrawing.tempShape.draw(context, myDrawing.tempShape)
 			}
 
 			else if(myDrawing.nextObject === "rect"){
@@ -121,12 +124,8 @@ $(document).ready(function(){
 					myDrawing.nextColor,
 					myDrawing.nextWidth,
 					"rect"));
-				
-				context.beginPath();
-				context.lineWidth = myDrawing.nextWidth;
-				context.strokeStyle = myDrawing.nextColor;
-				context.strokeRect(myDrawing.currentStartX, myDrawing.currentStartY, x - myDrawing.currentStartX, y - myDrawing.currentStartY); // (x,y) (width, height)
-				context.stroke();
+				myDrawing.tempShape.draw(context, myDrawing.tempShape);
+
 			}
 
 			else if(myDrawing.nextObject === "circle"){
@@ -137,73 +136,41 @@ $(document).ready(function(){
 					myDrawing.nextColor,
 					myDrawing.nextWidth,
 					"circle"));
-			    var radiusX = (x - myDrawing.currentStartX) * 0.5,
-			        radiusY = (y - myDrawing.currentStartY) * 0.5,
-			        centerX = myDrawing.currentStartX + radiusX,
-			        centerY = myDrawing.currentStartY + radiusY,
-			        step = 0.01,
-			        a = step,
-			        pi2 = Math.PI * 2 - step;
-			    context.beginPath();
-			    context.lineWidth = myDrawing.nextWidth;
-			    context.strokeStyle = myDrawing.nextColor;
-			    context.moveTo(centerX + radiusX * Math.cos(0),
-			               centerY + radiusY * Math.sin(0));
+				myDrawing.tempShape.centerX = myDrawing.currentStartX + myDrawing.tempShape.radiusX;
+				myDrawing.tempShape.centerY = myDrawing.currentStartY + myDrawing.tempShape.radiusY;
 
-			    for(; a < pi2; a += step) {
-			        context.lineTo(centerX + radiusX * Math.cos(a),
-			        centerY + radiusY * Math.sin(a));
-			    }
-
-			    context.closePath();
-			    context.stroke();
+			    myDrawing.tempShape.draw(context, myDrawing.tempShape);
 			}
 
 			else if(myDrawing.nextObject === "pen"){
-				var len = myDrawing.tempShape.xArray.length-1
-
 				myDrawing.tempShape.xArray.push(x);
 				myDrawing.tempShape.yArray.push(y);
 
-				for(var j = 0; j < len; j++){
-					context.beginPath();
-					context.lineWidth = myDrawing.nextWidth;
-					context.strokeStyle = myDrawing.nextColor;
-					context.moveTo(myDrawing.tempShape.xArray[j-1], myDrawing.tempShape.yArray[j-1]);
-					context.lineTo(myDrawing.tempShape.xArray[j], myDrawing.tempShape.yArray[j]);
-					context.closePath();
-					context.stroke();
-				}
+				myDrawing.tempShape.draw(context, myDrawing.tempShape);
 			}
 
 			else if(myDrawing.nextObject === "text"){
 				$("#idTextBox").css({"top": myDrawing.tempShape.startY, "left": myDrawing.tempShape.startX});
 			}
-			//console.log(myDrawing.movingShape);
+
 			else if(myDrawing.nextObject === "move" && myDrawing.movingShape !== undefined){
-				//console.log(myDrawing.movingShape.objName);
-				if(myDrawing.movingShape.objName === "rect"){
-					//console.log(myDrawing.movingShape)
-					myDrawing.tempShape = (new Rect(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x),
-						myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
+				var xOff = (myDrawing.moveX - x)
+				var yOff = (myDrawing.moveY - y)
+
+				if(myDrawing.movingShape.objName === "rect"){					
+					myDrawing.tempShape = (new Rect(myDrawing.movingShape.startX - xOff,
+						myDrawing.movingShape.startY - yOff,
 						myDrawing.movingShape.x,
 						myDrawing.movingShape.y,
 						myDrawing.movingShape.objColor,
 						myDrawing.movingShape.objWidth,
 						"rect"));
-
-					context.beginPath();
-					context.lineWidth = myDrawing.movingShape.objWidth;
-					context.strokeStyle = myDrawing.movingShape.objColor;
-					context.strokeRect(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x) ,
-						myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
-						myDrawing.movingShape.x,
-						myDrawing.movingShape.y);
-					context.stroke();
+					myDrawing.tempShape.draw(context, myDrawing.tempShape);
 				}
+
 				if(myDrawing.movingShape.objName === "text"){
-					myDrawing.tempShape = (new Tex(myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x),
-						myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y),
+					myDrawing.tempShape = (new Tex(myDrawing.movingShape.startX - xOff,
+						myDrawing.movingShape.startY - yOff,
 						myDrawing.movingShape.x,
 						myDrawing.movingShape.y,
 						myDrawing.movingShape.objColor,
@@ -211,37 +178,31 @@ $(document).ready(function(){
 						"text",
 						myDrawing.movingShape.myText));
 
+					//draw will not work when we call the draw function
+					//myDrawing.tempShape.draw(context, myDrawing.tempShape);
 					context.font = myDrawing.movingShape.objWidth;
 					context.fillStyle = myDrawing.movingShape.objColor;
 					context.fillText(myDrawing.movingShape.myText,
-						myDrawing.movingShape.startX - (myDrawing.movingShape.startX - x),
-						myDrawing.movingShape.startY - (myDrawing.movingShape.startY - y));
+						myDrawing.movingShape.startX - xOff,
+						myDrawing.movingShape.startY - yOff);
 				}
+
 				if(myDrawing.movingShape.objName === "pen"){
-					console.log("movig peepeppepennn")
-					console.log("a:", myDrawing.tempShape);
-					console.log("off:", (myDrawing.movingShape.x - x))
-					console.log("x:", x)
-					console.log("stX:", myDrawing.movingShape.x)
 					for(var j = 0; j < myDrawing.movingShape.xArray.length; j++){
-						console.log(myDrawing.movingShape.xArray[j], "-", (myDrawing.movingShape.x - x), "=", myDrawing.movingShape.xArray[j] - (myDrawing.movingShape.x - x));
-						//console.log(myDrawing.movingShape.xArray[j] + (myDrawing.movingShape.xArray[j] - x))
-						myDrawing.tempShape.xArray[j] = myDrawing.movingShape.xArray[j] - (myDrawing.movingShape.x - x);
-						myDrawing.tempShape.yArray[j] = myDrawing.movingShape.yArray[j] - (myDrawing.movingShape.y - y);
-						//console.log(x, y);
+						myDrawing.movingShape.xArray[j] = myDrawing.movingShape.xArray[j] - xOff
+						myDrawing.movingShape.yArray[j] = myDrawing.movingShape.yArray[j] - yOff;
+						myDrawing.moveX = x;
+						myDrawing.moveY = y;
+						// drawing is smother when we dont call this function
+						//myDrawing.tempShape.draw(context, myDrawing.tempShape)
 						context.beginPath();
 						context.lineWidth = myDrawing.movingShape.objWidth;
 						context.strokeStyle = myDrawing.movingShape.objColor;
-						//context.moveTo(myDrawing.tempShape.xArray[j-1], myDrawing.tempShape.yArray[j-1]);
-						//context.lineTo(myDrawing.tempShape.xArray[j], myDrawing.tempShape.yArray[j]);
-						context.moveTo(myDrawing.movingShape.xArray[j-1] - (myDrawing.movingShape.x - x), myDrawing.tempShape.yArray[j-1] - (myDrawing.movingShape.y - y));
-						context.lineTo(myDrawing.movingShape.xArray[j] - (myDrawing.movingShape.x - x), myDrawing.tempShape.yArray[j] - (myDrawing.movingShape.y - y));
+						context.moveTo(myDrawing.movingShape.xArray[j-1], myDrawing.movingShape.yArray[j-1]);
+						context.lineTo(myDrawing.movingShape.xArray[j], myDrawing.movingShape.yArray[j]);
 						context.closePath();
 						context.stroke();
-						myDrawing.tempShape.x = myDrawing.tempShape.x - (myDrawing.movingShape.x - x);
-						myDrawing.tempShape.y = myDrawing.tempShape.y - (myDrawing.movingShape.y - y);
 					}
-					console.log("b:",myDrawing.tempShape);
 				}
 			}
 		}
@@ -249,14 +210,9 @@ $(document).ready(function(){
 
 	$("#myCanvas").mouseup(function(e){
     	myDrawing.isDrawing = false;
-
-    	//console.log("a------:", myDrawing.allShapes)
-		//console.log(myDrawing.tempShape)
-    	if(myDrawing.tempShape !== undefined){
-    		
+    	if(myDrawing.tempShape !== undefined){	
     		myDrawing.allShapes.push(myDrawing.tempShape);
-    	} 
-    	console.log("b--------:", myDrawing.allShapes)   	
+    	}  	
     	myDrawing.tempShape = undefined;
     	myDrawing.movingShape = undefined;
 	});
@@ -279,31 +235,25 @@ $(document).ready(function(){
 		objWidth: 1,
 		objName: "line",
 		findMe: function(x, y, obj){
-			//console.log("findMeRect", myDrawing.allShapes[i]);
-			//console.log("found");
 			var xFound = false,
 			    yFound = false;
 			if(x >= obj.startX){
 				if(x <= (obj.startX + obj.x)){
-					//console.log("x found")
 					xFound = true;
 				}
 			}
 			else{
 				if(x >= (obj.startX + obj.x)){
-					//console.log("x found")
 					xFound = true;
 				}
 			}
 			if(y >= obj.startY){
 				if(y <= (obj.startY + obj.y)){
-					//console.log("Y found")
 					yFound = true;
 				}
 			}
 			else{
 				if(y >= (obj.startY + obj.y)){
-					//console.log("Y found")
 					yFound = true;
 				}
 			}
@@ -318,12 +268,12 @@ $(document).ready(function(){
 	});
 
 	var Line = Shape.extend({
-		draw: function(context, i){
+		draw: function(context, obj){
 			context.beginPath();
-			context.lineWidth = myDrawing.allShapes[i].objWidth;
-			context.strokeStyle = myDrawing.allShapes[i].objColor;
-	        context.moveTo(myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY);
-	        context.lineTo(myDrawing.allShapes[i].x, myDrawing.allShapes[i].y);
+			context.lineWidth = obj.objWidth;
+			context.strokeStyle = obj.objColor;
+	        context.moveTo(obj.startX, obj.startY);
+	        context.lineTo(obj.x, obj.y);
 	        context.stroke();
 		},
 		findMe: function(context, x, y, i){
@@ -332,29 +282,39 @@ $(document).ready(function(){
 	});
 
 	var Rect = Shape.extend({
-		draw: function(context, i){
+		draw: function(context, obj){
 			context.beginPath();
-			context.lineWidth = myDrawing.allShapes[i].objWidth;
-			context.strokeStyle = myDrawing.allShapes[i].objColor;
-			context.strokeRect(myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY, myDrawing.allShapes[i].x, myDrawing.allShapes[i].y); // (x,y) (width, height)
+			context.lineWidth = obj.objWidth;
+			context.strokeStyle = obj.objColor;
+			context.strokeRect(obj.startX, obj.startY, obj.x, obj.y); // (x,y) (width, height)
 			context.stroke();
 		}
 	});
 
+
 	var Circle = Shape.extend({
-		draw: function(context, i){
+		constructor: function(startX, startY, x, y, color, width, name){
+			this.base(startX, startY, x, y, color, width, name);
+			this.radiusX = (x - myDrawing.currentStartX) * 0.5;
+			this.radiusY = (y - myDrawing.currentStartY) * 0.5;
+			this.step = 0.01;
+			this.pi2 = Math.PI * 2 - 0.01;
+		},
+		centerX : undefined,
+		centerY : undefined,
+		draw: function(context, obj){
 			// taka út allt myDrawing og setja this í staðinn
-			var radiusX = (myDrawing.allShapes[i].x - myDrawing.allShapes[i].startX) * 0.5,
-	        radiusY = (myDrawing.allShapes[i].y - myDrawing.allShapes[i].startY) * 0.5,
-	        centerX = myDrawing.allShapes[i].startX + radiusX,
-	        centerY = myDrawing.allShapes[i].startY + radiusY,
-	        step = 0.01,
-	        a = step,
-	        pi2 = Math.PI * 2 - step;
+			var radiusX = obj.radiusX
+	        	radiusY = obj.radiusY
+	        	centerX = obj.startX + obj.radiusX,
+	        	centerY = obj.startY + obj.radiusY,
+	        	step = 0.01,
+	        	a = step,
+	        	pi2 = Math.PI * 2 - step;
 			    
 		    context.beginPath();
-		    context.lineWidth = myDrawing.allShapes[i].objWidth;
-		    context.strokeStyle = myDrawing.allShapes[i].objColor;
+		    context.lineWidth = obj.objWidth;
+		    context.strokeStyle = obj.objColor;
 		    context.moveTo(centerX + radiusX * Math.cos(0),
 		               centerY + radiusY * Math.sin(0));
 
@@ -362,9 +322,47 @@ $(document).ready(function(){
 		        context.lineTo(centerX + radiusX * Math.cos(a),
 		                   centerY + radiusY * Math.sin(a));
 		    }
-		    
 		    context.closePath();
 		    context.stroke();
+		},
+		findMe: function(x, y, obj){
+			console.log("finding circle")
+			var xa = [];
+			var ya = [];
+			var radiusX = obj.radiusX
+	        	radiusY = obj.radiusY
+	        	centerX = obj.startX + obj.radiusX,
+	        	centerY = obj.startY + obj.radiusY,
+	        	step = 0.01,
+	        	a = step,
+	        	pi2 = Math.PI * 2 - step;
+	        xa.push(centerX + radiusX * Math.cos(a));
+	        ya.push(centerY + radiusY * Math.sin(a));
+	        for(; a < pi2; a += step) {
+		        xa.push(centerX + radiusX * Math.cos(a)),
+		        ya.push(centerY + radiusY * Math.sin(a));
+		    }
+		    var ei = xa.length / 8;
+		    var qt = xa.length / 4;
+		    var half = xa.length / 2;
+		    console.log(xa[half] , x, xa[0])
+		    // if(xa[half] < x && xa[0] > x){
+		    // 	console.log("xxxxxxxxxxxxx");
+		    // }
+		    // if(ya[qt] > y && ya[half + qt] < y){
+		    // 	console.log("yyyyyyy");
+		    // }
+		    // console.log("stX:", obj.startX, "x: ", x);
+		    console.log(xa.length);
+		     for(var i = 0; i < half; i++){
+		     	if(xa[i+half] < x && xa[i] > x){
+		    		if(ya[i+qt] > y && ya[i+half + qt] < y){
+		    			console.log("lajsfnajldbnfkjsdnbfkjsdbnf");
+		    		}
+		    }
+		     }
+		    //console.log(xa, ya);
+		    return false
 		}
 	});
 
@@ -374,13 +372,15 @@ $(document).ready(function(){
 			this.xArray = [];
 			this.yArray = [];
 		},
-		draw: function(context, i){
-			for(var j = 0; j < this.xArray.length; j++){
+		draw: function(context, obj){
+			for(var j = 0; j < obj.xArray.length; j++){
 				context.beginPath();
-				context.lineWidth = myDrawing.allShapes[i].objWidth;
-				context.strokeStyle = myDrawing.allShapes[i].objColor;
-				context.moveTo(myDrawing.allShapes[i].xArray[j-1], myDrawing.allShapes[i].yArray[j-1]);
-				context.lineTo(myDrawing.allShapes[i].xArray[j], myDrawing.allShapes[i].yArray[j]);
+				context.lineWidth = obj.objWidth;
+				context.strokeStyle = obj.objColor;
+				//context.moveTo(myDrawing.tempShape.xArray[j-1], myDrawing.tempShape.yArray[j-1]);
+				//context.lineTo(myDrawing.tempShape.xArray[j], myDrawing.tempShape.yArray[j]);
+				context.moveTo(obj.xArray[j-1], obj.yArray[j-1]);
+				context.lineTo(obj.xArray[j], obj.yArray[j]);
 				context.closePath();
 				context.stroke();
 			}
@@ -403,23 +403,16 @@ $(document).ready(function(){
 			this.base(startX, startY, x, y, color, width, name);
 			this.myText = text;
 		},
-		draw: function(context, i){
+		draw: function(context, obj){
 			// Trying to eliminate the undefined
-			if(myDrawing.allShapes[i].myDrawing === undefined){
+			if(obj.myDrawing === undefined){
 				//console.log("undefined")
-				myDrawing.allShapes[i].myDrawing = "";
+				obj.myDrawing = "";
 			}
 			else{
-				//console.log("still")
-				//context.font = myDrawing.nextWidth + 2 + "px Arial";
-				context.font = myDrawing.allShapes[i].objWidth;
-				context.fillStyle = myDrawing.allShapes[i].objColor;
-				context.fillText(myDrawing.allShapes[i].myText, myDrawing.allShapes[i].startX, myDrawing.allShapes[i].startY);
-
-				//context.strokeRect(myDrawing.allShapes[i].startX,
-				//	myDrawing.allShapes[i].startY - 15,
-				//	context.measureText(myDrawing.allShapes[i].myText).width,
-				//	20);
+				context.font = obj.objWidth;
+				context.fillStyle = obj.objColor;
+				context.fillText(obj.myText, obj.startX, obj.startY);
 			}	
 		},
 		findHeight: function(h){
@@ -471,15 +464,6 @@ $(document).ready(function(){
 	        myDrawing.tempShape.y = myDrawing.tempShape.y - myDrawing.tempShape.findOffset(myDrawing.nextWidth);
 
 	        myDrawing.allShapes.push(myDrawing.tempShape);
-
-
-        	//context.strokeRect(myDrawing.tempShape.startX,
-			//	myDrawing.tempShape.startY - myDrawing.tempShape.findOffset(myDrawing.nextWidth),
-			//	context.measureText(canvasText).width,
-			//	myDrawing.tempShape.findHeight(myDrawing.nextWidth));//context.measureText(myDrawing.allShapes[i].myText).height); // (x,y) (width, height)
-				//console.log(context.measureText(myDrawing.allShapes[i].myText).width);
-				//console.log(context.measureText(myDrawing.allShapes[i].myText).height);
-
 	        
 	        $("#idTextBox").val('');
 	        $("#idTextBox").hide();
