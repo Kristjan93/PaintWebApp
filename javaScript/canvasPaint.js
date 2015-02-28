@@ -1,8 +1,3 @@
-// þarf að skoða: Ekki hægt að gera bara einn punkt með pennannum
-// Breytist penSixe a circle þegar hann er færður
-
-
-
 $(document).ready(function(){
 	var canvas = document.getElementById("myCanvas");
 	var context = canvas.getContext("2d");
@@ -55,6 +50,7 @@ $(document).ready(function(){
 		else if(document.getElementById('idRadioText').checked){
 			myDrawing.nextObject = "text";
 			myDrawing.tempShape = (new Tex(e.pageX, e.pageY, 0, 0, myDrawing.nextColor, myDrawing.nextWidth, "text", ""));
+
 			$("#idTextBox").css({"top": e.pageY, "left": e.pageX});
 			$("#idTextBox").show();
 		}
@@ -63,17 +59,14 @@ $(document).ready(function(){
 			myDrawing.moveX = myDrawing.currentStartX
 			myDrawing.moveY = myDrawing.currentStartY
 
+			//look for a shape at a given point. Start from the newest
 			for(var a = myDrawing.allShapes.length-1; a >= 0; a--){
 				if(myDrawing.allShapes[a].findMe(myDrawing.currentStartX, myDrawing.currentStartY, myDrawing.allShapes[a])){
 					myDrawing.movingShape = myDrawing.allShapes[a];
 					myDrawing.tempShape = myDrawing.allShapes[a];
-					myDrawing.tempShape = myDrawing.tempShape;
-
+					// if a shape is found we remove it ad redraw it later
 					myDrawing.allShapes.splice(a,1);
 					break;
-				}
-				else{
-					console.log("NOT FOUND")
 				}
 			}
 		}
@@ -88,7 +81,7 @@ $(document).ready(function(){
 
 			x = e.pageX - this.offsetLeft;
 			y = e.pageY - this.offsetTop;
-			console.log(x, y)
+
 			if(myDrawing.nextObject === "line"){
 				myDrawing.tempShape = (new Line(myDrawing.currentStartX,
 					myDrawing.currentStartY,
@@ -202,7 +195,6 @@ $(document).ready(function(){
 				}
 
 				else if(myDrawing.movingShape.objName === "circle"){
-					console.log("moving circle")
 
 					myDrawing.tempShape = (new Circle(myDrawing.movingShape.startX - xOff,
 						myDrawing.movingShape.startY - yOff,
@@ -305,6 +297,7 @@ $(document).ready(function(){
 				y1 = obj.y;
 				y2 = obj.startY;
 			}
+			//conpare the slopes to see if we find the line
 			var slope = obj.findSlope(x1, y1, x2, y2);
 			var targetSlope = obj.findSlope(x1,y1, x, y);
 			if(x < x2 && x > x1){
@@ -340,7 +333,6 @@ $(document).ready(function(){
 		centerX : undefined,
 		centerY : undefined,
 		draw: function(context, obj){
-			// taka út allt myDrawing og setja this í staðinn
 			var radiusX = obj.radiusX
 	        	radiusY = obj.radiusY
 	        	centerX = obj.startX + obj.radiusX,
@@ -363,7 +355,6 @@ $(document).ready(function(){
 		    context.stroke();
 		},
 		findMe: function(x, y, obj){
-			console.log("finding circle")
 			var xa = [];
 			var ya = [];
 			var radiusX = obj.radiusX
@@ -382,13 +373,13 @@ $(document).ready(function(){
 		    var qt = xa.length / 4;
 		    var half = xa.length / 2;
 		    var count = 0;
-		     for(var i = 0; i < half; i++){
+		    for(var i = 0; i < half; i++){
 		     	if(xa[i+half] < x && xa[i] > x){
 		    		if(ya[i+qt] > y && ya[i+half + qt] < y){
 		    			count++
 		    		}
+		    	}
 		    }
-		     }
 		    if(count > 60){
 		    	return true
 		    }
@@ -470,7 +461,6 @@ $(document).ready(function(){
 		}
 	})
 
-
 	$("#idTextBox").keypress(function(e){
 	    if(e.which == 13 && myDrawing.isDrawing) {
 	        var canvasText = $(this).val();
@@ -493,10 +483,9 @@ $(document).ready(function(){
 
 	        myDrawing.isDrawing = false;
 	        myDrawing.tempShape = undefined;
-	        //myDrawing.allShapes.push(myDrawing.tempShape);
-	        //myDrawing.drawAllShapes(context);
 	    }
 	});
+
 
 	$(".colorPicker").colorpicker().on('changeColor', function(ev){
 	  	myDrawing.nextColor = ev.color.toHex();
@@ -519,12 +508,10 @@ $(document).ready(function(){
 		};
 
 	$("#btnUndo").click(function() {
-		//console.log("here");
 		undoRedo.popItem();
 	});
 
 	$("#btnRedo").click(function(){
-		//console.log("here2");
 		undoRedo.undoItem();
 	});
 	$("#btnClear").click(function(){
@@ -673,12 +660,8 @@ $(document).ready(function(){
 					console.log(data);
 					var storedShapes = JSON.parse(data.WhiteboardContents);
 
-					//console.log(storedShapes);
-
 					for(var i = 0; i < storedShapes.length; i++){
 						var obj = storedShapes[i];
-
-						//console.log("here " + obj);
 
 						if(obj.objName === "circle"){
 							myDrawing.tempShape = (new Circle(obj.startX,
