@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-#Drawing application, using JavaScript and HTML5(canvas).
-  * More information about the project can be found in projectDescription.txt
-  * Made a paint application using with canvas.  Go ahead and tray it!
-=======
 # Vef_paint
 
 In this assignment, your task is to write a drawing application, using JavaScript and HTML5. It should use the HTML5 canvas element, and use object-oriented design for the JavaScript code. A use case for your application could be for a teacher which wants to use your application instead of a regular whiteboard.
