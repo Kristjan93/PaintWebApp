@@ -25,8 +25,9 @@ These properties are fixed(unchangeable) once the object is drawn.  **All except
 
 General workflow functionality is possible such as
   * undo and redo
-  * save drawing 
   * clear canvas
+  * save drawing 
+
 
 ## Notes
 It was pointed out that the top color bar was misdirecting as it is not the color picker.
